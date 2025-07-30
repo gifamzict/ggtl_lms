@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { DollarSign, ShoppingCart, BookOpen, Users, CheckCircle, XCircle } from "lucide-react";
 
 const chartData = [
@@ -63,30 +64,37 @@ interface StatCardProps {
 }
 
 const StatCard = ({ title, value, icon, currency }: StatCardProps) => (
-  <Card className="bg-white border border-gray-200">
+  <Card className="bg-card border-border">
     <CardContent className="flex items-center justify-between p-6">
       <div>
-        <p className="text-sm font-medium text-gray-600">{title}</p>
-        <p className="text-2xl font-bold text-gray-900">
+        <p className="text-sm font-medium text-muted-foreground">{title}</p>
+        <p className="text-2xl font-bold text-foreground">
           {currency && currency}{value}
         </p>
       </div>
-      <div className="p-3 bg-blue-100 rounded-lg">
-        {icon}
+      <div className="p-3 bg-primary/10 rounded-lg">
+        <div className="text-primary">{icon}</div>
       </div>
     </CardContent>
   </Card>
 );
 
 export default function AdminDashboard() {
+  // Mock course statistics - can be replaced with real data
+  const totalCourses = 71;
+  const pendingCourses = 5;
+  const rejectedCourses = 2;
+  const activeCourses = totalCourses - pendingCourses - rejectedCourses;
+
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gray-50">
+      <div className="min-h-screen flex w-full bg-background">
         <AdminSidebar />
         
         <main className="flex-1 p-6">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+            <ThemeToggle />
           </div>
 
           {/* KPI Cards */}
@@ -94,43 +102,43 @@ export default function AdminDashboard() {
             <StatCard
               title="Today's Orders"
               value="NO"
-              icon={<DollarSign className="w-6 h-6 text-blue-600" />}
+              icon={<DollarSign className="w-6 h-6" />}
             />
             <StatCard
               title="This weeks Orders"
               value="NO"
-              icon={<DollarSign className="w-6 h-6 text-blue-600" />}
+              icon={<DollarSign className="w-6 h-6" />}
             />
             <StatCard
               title="Monthly Orders"
               value="NO"
-              icon={<DollarSign className="w-6 h-6 text-blue-600" />}
+              icon={<DollarSign className="w-6 h-6" />}
             />
             <StatCard
               title="This Year's Orders"
               value="110411"
-              icon={<DollarSign className="w-6 h-6 text-blue-600" />}
+              icon={<DollarSign className="w-6 h-6" />}
               currency="₦"
             />
             <StatCard
               title="Total Orders"
               value="16"
-              icon={<ShoppingCart className="w-6 h-6 text-blue-600" />}
+              icon={<ShoppingCart className="w-6 h-6" />}
             />
             <StatCard
               title="Pending Courses"
-              value="0"
-              icon={<BookOpen className="w-6 h-6 text-blue-600" />}
+              value={pendingCourses}
+              icon={<BookOpen className="w-6 h-6" />}
             />
             <StatCard
               title="Rejected Courses"
-              value="0"
-              icon={<XCircle className="w-6 h-6 text-blue-600" />}
+              value={rejectedCourses}
+              icon={<XCircle className="w-6 h-6" />}
             />
             <StatCard
               title="Total Courses"
-              value="71"
-              icon={<BookOpen className="w-6 h-6 text-blue-600" />}
+              value={totalCourses}
+              icon={<BookOpen className="w-6 h-6" />}
             />
           </div>
 
@@ -139,7 +147,7 @@ export default function AdminDashboard() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-lg font-semibold text-gray-900">Order Analytics</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-foreground">Order Analytics</CardTitle>
                 </div>
                 <div className="flex items-center space-x-4 text-sm">
                   <div className="flex items-center">
@@ -157,18 +165,20 @@ export default function AdminDashboard() {
               <div className="h-96">
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                     <XAxis 
                       dataKey="month" 
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fontSize: 12, fill: '#666' }}
+                      className="text-muted-foreground"
+                      tick={{ fontSize: 12 }}
                     />
                     <YAxis 
                       yAxisId="left"
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fontSize: 12, fill: '#666' }}
+                      className="text-muted-foreground"
+                      tick={{ fontSize: 12 }}
                       domain={[0, 120000]}
                     />
                     <YAxis 
@@ -176,21 +186,23 @@ export default function AdminDashboard() {
                       orientation="right"
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fontSize: 12, fill: '#666' }}
+                      className="text-muted-foreground"
+                      tick={{ fontSize: 12 }}
                       domain={[0, 4.5]}
                     />
                     <Tooltip 
                       contentStyle={{
-                        backgroundColor: 'white',
-                        border: '1px solid #e0e0e0',
+                        backgroundColor: 'hsl(var(--background))',
+                        border: '1px solid hsl(var(--border))',
                         borderRadius: '8px',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                        color: 'hsl(var(--foreground))'
                       }}
                     />
                     <Bar 
                       yAxisId="left"
                       dataKey="orderAmount" 
-                      fill="#3b82f6" 
+                      fill="hsl(var(--primary))" 
                       radius={[4, 4, 0, 0]}
                     />
                     <Line 
@@ -213,20 +225,20 @@ export default function AdminDashboard() {
             {/* Recent Courses */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg font-semibold text-gray-900">Recent Courses</CardTitle>
+                <CardTitle className="text-lg font-semibold text-foreground">Recent Courses</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex justify-between text-sm font-medium text-gray-600 border-b pb-2">
+                  <div className="flex justify-between text-sm font-medium text-muted-foreground border-b pb-2">
                     <span>COURSE</span>
                     <span>STATUS</span>
                   </div>
                   {recentCourses.map((course, index) => (
                     <div key={index} className="flex justify-between items-center">
-                      <span className="text-sm text-blue-600 hover:underline cursor-pointer">
+                      <span className="text-sm text-primary hover:underline cursor-pointer">
                         {course.title}
                       </span>
-                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                      <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 text-xs rounded-full">
                         {course.status}
                       </span>
                     </div>
@@ -238,20 +250,20 @@ export default function AdminDashboard() {
             {/* Recent Blogs */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg font-semibold text-gray-900">Recent Blogs</CardTitle>
+                <CardTitle className="text-lg font-semibold text-foreground">Recent Blogs</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex justify-between text-sm font-medium text-gray-600 border-b pb-2">
+                  <div className="flex justify-between text-sm font-medium text-muted-foreground border-b pb-2">
                     <span>TITLE</span>
                     <span>STATUS</span>
                   </div>
                   {recentBlogs.map((blog, index) => (
                     <div key={index} className="flex justify-between items-center">
-                      <span className="text-sm text-blue-600 hover:underline cursor-pointer">
+                      <span className="text-sm text-primary hover:underline cursor-pointer">
                         {blog.title}
                       </span>
-                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                      <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 text-xs rounded-full">
                         {blog.status}
                       </span>
                     </div>
@@ -263,22 +275,22 @@ export default function AdminDashboard() {
             {/* Recent Orders */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg font-semibold text-gray-900">Recent Orders</CardTitle>
+                <CardTitle className="text-lg font-semibold text-foreground">Recent Orders</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="grid grid-cols-3 text-sm font-medium text-gray-600 border-b pb-2">
+                  <div className="grid grid-cols-3 text-sm font-medium text-muted-foreground border-b pb-2">
                     <span>INVOICE</span>
                     <span>USER</span>
                     <span>AMOUNT</span>
                   </div>
                   {recentOrders.map((order, index) => (
                     <div key={index} className="grid grid-cols-3 text-sm">
-                      <span className="text-blue-600 hover:underline cursor-pointer">
+                      <span className="text-primary hover:underline cursor-pointer">
                         {order.invoice}
                       </span>
-                      <span className="text-gray-900">{order.user}</span>
-                      <span className="text-gray-900">{order.amount}</span>
+                      <span className="text-foreground">{order.user}</span>
+                      <span className="text-foreground">{order.amount}</span>
                     </div>
                   ))}
                 </div>

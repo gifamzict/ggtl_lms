@@ -139,13 +139,13 @@ export function AdminSidebar() {
   };
 
   return (
-    <Sidebar className="border-r border-gray-200 bg-slate-800 text-white">
-      <div className="flex items-center justify-between p-4 border-b border-gray-700">
+    <Sidebar className="border-r border-sidebar-border bg-sidebar-background text-sidebar-foreground">
+      <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-white rounded"></div>
+          <div className="w-8 h-8 bg-sidebar-primary rounded"></div>
           {!collapsed && <span className="font-semibold text-lg">GGTL Admin</span>}
         </div>
-        <SidebarTrigger className="text-white hover:bg-slate-700" />
+        <SidebarTrigger className="text-sidebar-foreground hover:bg-sidebar-accent" />
       </div>
 
       <SidebarContent className="p-2">
@@ -159,7 +159,7 @@ export function AdminSidebar() {
                     onOpenChange={() => toggleItem(item.title)}
                   >
                     <CollapsibleTrigger asChild>
-                      <SidebarMenuButton className="w-full justify-between text-gray-300 hover:text-white hover:bg-slate-700">
+                      <SidebarMenuButton className="w-full justify-between text-sidebar-foreground hover:bg-sidebar-accent">
                         <div className="flex items-center">
                           <item.icon className="mr-3 h-4 w-4" />
                           {!collapsed && <span>{item.title}</span>}
@@ -177,8 +177,8 @@ export function AdminSidebar() {
                           <SidebarMenuSubItem key={subItem.title}>
                             <SidebarMenuSubButton 
                               asChild
-                              className={`ml-6 text-gray-400 hover:text-white hover:bg-slate-700 ${
-                                isActive(subItem.url) ? 'bg-slate-700 text-white' : ''
+                              className={`ml-6 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent ${
+                                isActive(subItem.url) ? 'bg-sidebar-accent text-sidebar-foreground' : ''
                               }`}
                             >
                               <NavLink to={subItem.url}>
@@ -193,8 +193,8 @@ export function AdminSidebar() {
                 ) : (
                   <SidebarMenuButton 
                     asChild
-                    className={`text-gray-300 hover:text-white hover:bg-slate-700 ${
-                      isActive(item.url!) ? 'bg-slate-700 text-white' : ''
+                    className={`text-sidebar-foreground hover:bg-sidebar-accent ${
+                      isActive(item.url!) ? 'bg-sidebar-accent text-sidebar-primary-foreground' : ''
                     }`}
                   >
                     <NavLink to={item.url!}>
