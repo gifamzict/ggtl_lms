@@ -2,7 +2,10 @@ import { motion } from 'framer-motion';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen, Users, Award, TrendingUp, Target, Zap } from 'lucide-react';
+import { BookOpen, Users, Award, TrendingUp, Target, Zap, Play, Star, Clock, CheckCircle, ArrowRight, Globe, Shield, Sparkles } from 'lucide-react';
+import heroImage from '@/assets/hero-learning.jpg';
+import codingImage from '@/assets/coding-workspace.jpg';
+import studentImage from '@/assets/student-success.jpg';
 
 const Index = () => {
   const { user, openAuthModal, loading } = useAuthStore();
@@ -121,70 +124,114 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <motion.section
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className="relative bg-gradient-to-br from-primary to-primary/80 text-white py-20 lg:py-32 overflow-hidden"
+        className="relative py-20 lg:py-32 overflow-hidden"
+        style={{
+          backgroundImage: `linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(29, 78, 216, 0.95)), url(${heroImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
       >
-        <div className="absolute inset-0 bg-black/20"></div>
         <div className="container mx-auto px-4 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
+              className="text-white"
             >
-              <div className="flex items-center gap-2 mb-6">
-                <BookOpen className="h-6 w-6" />
-                <span className="text-sm font-medium uppercase tracking-wider">Show Up For Learning</span>
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-8 border border-white/20">
+                <Sparkles className="h-4 w-4" />
+                <span className="text-sm font-medium">Transform Your Career</span>
               </div>
               <h1 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                Unlock Your Potential with{" "}
-                <span className="text-yellow-400">In-Demand Tech Skills</span>
+                Master In-Demand
+                <span className="block text-accent"> Tech Skills</span>
               </h1>
-              <p className="text-xl mb-8 text-blue-100">
-                Choose from 100+ online video courses with new additions published every month. 
-                Learn from industry experts and advance your career.
+              <p className="text-xl mb-8 text-white/90 leading-relaxed max-w-lg">
+                Join thousands of professionals learning from industry experts. 
+                Build the skills that matter most in today's digital economy.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
                   size="lg" 
                   onClick={openAuthModal}
-                  className="bg-yellow-400 text-black hover:bg-yellow-500 font-semibold px-8 py-4 text-lg"
+                  className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-8 py-4 text-lg h-auto"
                 >
-                  Start Free Trial
+                  Start Learning Today
+                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="border-white text-white hover:bg-white hover:text-primary px-8 py-4 text-lg"
+                  className="border-white/30 text-white hover:bg-white/10 px-8 py-4 text-lg h-auto backdrop-blur-sm"
                 >
-                  See Our Lesson Showcase
+                  <Play className="mr-2 h-5 w-5" />
+                  Watch Preview
                 </Button>
               </div>
             </motion.div>
+            
             <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.4 }}
               className="relative"
             >
-              <div className="relative z-10">
-                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm font-medium">WORLDWIDE BEST ONLINE COURSE</span>
-                    <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center">
-                      <span className="text-black font-bold">50h</span>
+              <div className="bg-white/95 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                    <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                    <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                  </div>
+                  <div className="flex items-center gap-2 bg-primary/10 rounded-lg px-3 py-1">
+                    <Clock className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium text-primary">45h Total</span>
+                  </div>
+                </div>
+                <div className="mb-4">
+                  <span className="inline-block bg-accent/10 text-accent text-xs font-medium px-3 py-1 rounded-full mb-3">
+                    BESTSELLER
+                  </span>
+                  <h3 className="text-2xl font-bold text-foreground mb-2">
+                    Complete Web Development Bootcamp
+                  </h3>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <BookOpen className="h-4 w-4" />
+                      <span>32 Lessons</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Users className="h-4 w-4" />
+                      <span>2.4k Students</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <span>4.9</span>
                     </div>
                   </div>
-                  <h3 className="text-2xl font-bold mb-2">Advanced Excel Techniques for Financial</h3>
-                  <div className="flex items-center gap-4 text-sm">
-                    <span>📚 24 Lessons</span>
-                    <span>👥 38 Students</span>
+                </div>
+                <img 
+                  src={codingImage} 
+                  alt="Coding workspace" 
+                  className="w-full h-32 object-cover rounded-xl mb-4"
+                />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <img 
+                      src={studentImage} 
+                      alt="Instructor" 
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                    <span className="text-sm font-medium text-foreground">Sarah Chen</span>
                   </div>
+                  <span className="text-2xl font-bold text-primary">$89</span>
                 </div>
               </div>
             </motion.div>
@@ -197,16 +244,18 @@ const Index = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.3 }}
-        className="py-12 bg-white border-b"
+        className="py-16 bg-background"
       >
         <div className="container mx-auto px-4">
-          <p className="text-center text-gray-600 mb-8">Trusted by professionals from leading companies</p>
-          <div className="flex justify-center items-center space-x-12 opacity-60">
-            <span className="text-2xl font-bold">Google</span>
-            <span className="text-2xl font-bold">Microsoft</span>
-            <span className="text-2xl font-bold">Amazon</span>
-            <span className="text-2xl font-bold">Netflix</span>
-            <span className="text-2xl font-bold">Apple</span>
+          <p className="text-center text-muted-foreground mb-12 text-lg">
+            Trusted by professionals from leading companies worldwide
+          </p>
+          <div className="flex justify-center items-center gap-12 flex-wrap opacity-70">
+            <span className="text-2xl font-bold text-foreground">Google</span>
+            <span className="text-2xl font-bold text-foreground">Microsoft</span>
+            <span className="text-2xl font-bold text-foreground">Amazon</span>
+            <span className="text-2xl font-bold text-foreground">Meta</span>
+            <span className="text-2xl font-bold text-foreground">Netflix</span>
           </div>
         </div>
       </motion.section>
@@ -216,59 +265,66 @@ const Index = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, delay: 0.4 }}
-        className="py-20 bg-gray-50"
+        className="py-24 bg-muted/30"
       >
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <BookOpen className="h-6 w-6 text-primary" />
-              <span className="text-primary font-medium uppercase tracking-wider">Why Choose GGTL</span>
+          <div className="text-center mb-20">
+            <div className="inline-flex items-center gap-2 bg-primary/10 rounded-full px-4 py-2 mb-6">
+              <Shield className="h-5 w-5 text-primary" />
+              <span className="text-primary font-medium">Why Choose GGTL</span>
             </div>
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">Learn From Experts</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Our platform offers world-class learning experiences designed to help you succeed in your career
+            <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">
+              Learn with Confidence
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Our platform combines expert instruction with cutting-edge technology 
+              to deliver an unparalleled learning experience.
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              className="bg-green-50 p-8 rounded-2xl"
-            >
-              <div className="w-16 h-16 bg-green-500 rounded-xl flex items-center justify-center mb-6">
-                <BookOpen className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Learn From Experts</h3>
-              <p className="text-gray-600">Get guidance from industry professionals with years of real-world experience.</p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              className="bg-pink-50 p-8 rounded-2xl"
-            >
-              <div className="w-16 h-16 bg-pink-500 rounded-xl flex items-center justify-center mb-6">
-                <Award className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Earn a Certificate</h3>
-              <p className="text-gray-600">Receive industry-recognized certificates to showcase your new skills.</p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.7 }}
-              className="bg-blue-50 p-8 rounded-2xl"
-            >
-              <div className="w-16 h-16 bg-blue-500 rounded-xl flex items-center justify-center mb-6">
-                <TrendingUp className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">5400+ Courses</h3>
-              <p className="text-gray-600">Access thousands of courses across multiple disciplines and skill levels.</p>
-            </motion.div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              {
+                icon: <BookOpen className="h-8 w-8" />,
+                title: "Expert Instructors",
+                description: "Learn from industry veterans with real-world experience and proven track records.",
+                color: "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400"
+              },
+              {
+                icon: <CheckCircle className="h-8 w-8" />,
+                title: "Lifetime Access",
+                description: "Get unlimited access to all course materials and future updates forever.",
+                color: "bg-green-50 text-green-600 dark:bg-green-950 dark:text-green-400"
+              },
+              {
+                icon: <Award className="h-8 w-8" />,
+                title: "Certificates",
+                description: "Earn industry-recognized certificates to showcase your achievements.",
+                color: "bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400"
+              },
+              {
+                icon: <Globe className="h-8 w-8" />,
+                title: "Global Community",
+                description: "Connect with learners worldwide and build your professional network.",
+                color: "bg-orange-50 text-orange-600 dark:bg-orange-950 dark:text-orange-400"
+              }
+            ].map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
+                className="group"
+              >
+                <Card className="h-full p-8 hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1 border-0 bg-background">
+                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 ${feature.color}`}>
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-xl font-bold text-foreground mb-4">{feature.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
+                </Card>
+              </motion.div>
+            ))}
           </div>
         </div>
       </motion.section>
@@ -278,52 +334,59 @@ const Index = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, delay: 0.6 }}
-        className="py-20"
+        className="py-24 bg-background"
       >
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">Latest Bundle Courses</h2>
-            <div className="flex justify-center space-x-4 mb-8">
-              <Button className="bg-primary text-white">HTML & CSS</Button>
-              <Button variant="outline">Python</Button>
-              <Button variant="outline">Data Analysis</Button>
-              <Button variant="outline">Machine Learning</Button>
+            <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">
+              Popular Courses
+            </h2>
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Discover our most-loved courses that have helped thousands of students advance their careers.
+            </p>
+            <div className="flex justify-center gap-3 flex-wrap">
+              <Button variant="default" size="sm">All Courses</Button>
+              <Button variant="outline" size="sm">Web Development</Button>
+              <Button variant="outline" size="sm">Data Science</Button>
+              <Button variant="outline" size="sm">Design</Button>
+              <Button variant="outline" size="sm">Business</Button>
             </div>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
-                title: "E-commerce Strategies for Small Businesses",
-                duration: "50h 00m",
-                lessons: 24,
-                students: 38,
-                price: "₦141",
-                color: "from-red-400 to-orange-400"
+                title: "Complete React Developer Bootcamp",
+                duration: "42h",
+                lessons: 156,
+                students: "12.5k",
+                price: "$89",
+                rating: 4.9,
+                instructor: "Alex Johnson",
+                image: codingImage,
+                level: "Beginner to Advanced"
               },
               {
-                title: "Product Essentials: From Idea to Market", 
-                duration: "50h 00m",
-                lessons: 24,
-                students: 38,
-                price: "₦140",
-                color: "from-blue-400 to-cyan-400"
+                title: "Python for Data Science & AI",
+                duration: "38h",
+                lessons: 124,
+                students: "8.2k",
+                price: "$79",
+                rating: 4.8,
+                instructor: "Dr. Maria Rodriguez",
+                image: studentImage,
+                level: "Intermediate"
               },
               {
-                title: "Mindful Leadership: Leading with Compassion",
-                duration: "50h 00m", 
-                lessons: 24,
-                students: 38,
-                price: "₦156",
-                color: "from-green-400 to-emerald-400"
-              },
-              {
-                title: "Advanced Excel Techniques for Financial",
-                duration: "50h 00m",
-                lessons: 24, 
-                students: 38,
-                price: "₦64",
-                color: "from-purple-400 to-pink-400"
+                title: "UX/UI Design Masterclass",
+                duration: "35h",
+                lessons: 98,
+                students: "6.7k",
+                price: "$94",
+                rating: 4.9,
+                instructor: "David Kim",
+                image: heroImage,
+                level: "All Levels"
               }
             ].map((course, index) => (
               <motion.div
@@ -331,63 +394,127 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.7 + index * 0.1 }}
-                className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
+                className="group cursor-pointer"
               >
-                <div className={`h-48 bg-gradient-to-br ${course.color} relative`}>
-                  <div className="absolute top-4 right-4 bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-1">
-                    🕒 {course.duration}
+                <Card className="overflow-hidden border-0 bg-background shadow-lg hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1">
+                  <div className="relative">
+                    <img 
+                      src={course.image} 
+                      alt={course.title}
+                      className="w-full h-48 object-cover"
+                    />
+                    <div className="absolute top-4 left-4 bg-accent text-accent-foreground px-3 py-1 rounded-full text-sm font-medium">
+                      {course.level}
+                    </div>
+                    <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {course.duration}
+                    </div>
                   </div>
-                </div>
-                <div className="p-6">
-                  <h3 className="font-bold text-lg mb-4 line-clamp-2">{course.title}</h3>
-                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-                    <span>📚 {course.lessons} Lessons</span>
-                    <span>👥 {course.students} Students</span>
-                  </div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 bg-blue-500 rounded-full"></div>
-                    <span className="text-sm">Instructor</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Button variant="outline" size="sm">Add To Cart →</Button>
-                    <span className="font-bold text-lg">{course.price}</span>
-                  </div>
-                </div>
+                  <CardContent className="p-6">
+                    <h3 className="font-bold text-lg mb-3 line-clamp-2 group-hover:text-primary transition-colors">
+                      {course.title}
+                    </h3>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+                      <div className="flex items-center gap-1">
+                        <BookOpen className="h-4 w-4" />
+                        <span>{course.lessons} lessons</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Users className="h-4 w-4" />
+                        <span>{course.students} students</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mb-4">
+                      <img 
+                        src={studentImage} 
+                        alt={course.instructor}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                      <span className="text-sm font-medium text-foreground">{course.instructor}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <span className="font-medium text-foreground">{course.rating}</span>
+                      </div>
+                      <span className="text-2xl font-bold text-primary">{course.price}</span>
+                    </div>
+                  </CardContent>
+                </Card>
               </motion.div>
             ))}
           </div>
         </div>
       </motion.section>
 
-      {/* Newsletter Section */}
+      {/* Testimonials Section */}
       <motion.section
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, delay: 0.8 }}
-        className="py-20 bg-gradient-to-r from-green-400 to-green-600 text-white"
+        className="py-24 bg-muted/30"
       >
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-4xl font-bold mb-6">
-                Eager to Receive Special Offers & Updates on Courses?
-              </h2>
-              <div className="flex gap-4">
-                <input
-                  type="email"
-                  placeholder="Your email address..."
-                  className="flex-1 px-6 py-4 rounded-xl text-gray-900"
-                />
-                <Button className="bg-primary hover:bg-primary/90 px-8 py-4 rounded-xl">
-                  Subscribe
-                </Button>
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="w-64 h-64 mx-auto bg-white/10 rounded-full flex items-center justify-center">
-                <span className="text-6xl">📚</span>
-              </div>
-            </div>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">
+              What Our Students Say
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Join thousands of satisfied learners who have transformed their careers with GGTL.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                name: "Sarah Johnson",
+                role: "Frontend Developer at Google",
+                content: "GGTL's courses helped me transition from marketing to tech. The instructors are amazing and the content is always up-to-date.",
+                rating: 5
+              },
+              {
+                name: "Michael Chen",
+                role: "Data Scientist at Microsoft",
+                content: "The Python course was exactly what I needed to advance my career. Clear explanations and practical projects made all the difference.",
+                rating: 5
+              },
+              {
+                name: "Emily Rodriguez",
+                role: "UX Designer at Spotify",
+                content: "As someone with no design background, GGTL made it possible for me to become a professional designer. Highly recommended!",
+                rating: 5
+              }
+            ].map((testimonial, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.9 + index * 0.1 }}
+              >
+                <Card className="p-8 h-full border-0 bg-background shadow-lg">
+                  <div className="flex items-center gap-1 mb-4">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <p className="text-muted-foreground mb-6 leading-relaxed italic">
+                    "{testimonial.content}"
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={studentImage} 
+                      alt={testimonial.name}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                    <div>
+                      <h4 className="font-semibold text-foreground">{testimonial.name}</h4>
+                      <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+            ))}
           </div>
         </div>
       </motion.section>
@@ -397,22 +524,41 @@ const Index = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, delay: 1.0 }}
-        className="py-20 bg-primary text-white"
+        className="py-24 bg-primary text-primary-foreground relative overflow-hidden"
       >
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-            Ready to Start Your Learning Journey?
-          </h2>
-          <p className="text-xl mb-8 text-blue-100 max-w-2xl mx-auto">
-            Join thousands of students who are already advancing their careers with GGTL
-          </p>
-          <Button 
-            size="lg" 
-            onClick={openAuthModal}
-            className="bg-yellow-400 text-black hover:bg-yellow-500 font-semibold px-12 py-4 text-lg"
+        <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/80"></div>
+        <div className="container mx-auto px-4 relative z-10 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.2 }}
           >
-            Sign Up for Free
-          </Button>
+            <h2 className="text-4xl lg:text-6xl font-bold mb-6 leading-tight">
+              Ready to Transform
+              <span className="block">Your Career?</span>
+            </h2>
+            <p className="text-xl mb-12 text-primary-foreground/90 max-w-2xl mx-auto leading-relaxed">
+              Join over 50,000 students who are already building the skills they need 
+              to succeed in the digital economy.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                size="lg" 
+                onClick={openAuthModal}
+                className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-12 py-6 text-lg h-auto"
+              >
+                Start Learning for Free
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline"
+                className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 px-12 py-6 text-lg h-auto"
+              >
+                View All Courses
+              </Button>
+            </div>
+          </motion.div>
         </div>
       </motion.section>
     </div>
