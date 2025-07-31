@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useAuth } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +9,8 @@ import codingImage from '@/assets/coding-workspace.jpg';
 import studentImage from '@/assets/student-success.jpg';
 
 const Index = () => {
-  const { user, openAuthModal, loading } = useAuthStore();
+  const { user, loading } = useAuth();
+  const { openAuthModal } = useAuthStore();
 
   if (loading) {
     return (
