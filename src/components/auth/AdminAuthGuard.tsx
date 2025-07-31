@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { Skeleton } from '@/components/ui/skeleton';
 
 interface AdminAuthGuardProps {
   children: React.ReactNode;
@@ -31,8 +30,17 @@ export function AdminAuthGuard({ children }: AdminAuthGuardProps) {
     );
   }
 
+  // Debug logging
+  console.log('AdminAuthGuard Debug:', {
+    user: user?.id,
+    userProfile: userProfile?.role,
+    isAdminResult: isAdmin(),
+    loading
+  });
+
   // Check if user is authenticated and has admin privileges
   if (!user || !userProfile || !isAdmin()) {
+    console.log('AdminAuthGuard: Redirecting to login - insufficient privileges');
     // Store the intended destination for redirect after login
     const redirectTo = location.pathname + location.search;
     return (
@@ -43,6 +51,7 @@ export function AdminAuthGuard({ children }: AdminAuthGuardProps) {
     );
   }
 
+  console.log('AdminAuthGuard: Access granted to admin user');
   // User is authenticated and authorized - render the protected content
   return <>{children}</>;
 }

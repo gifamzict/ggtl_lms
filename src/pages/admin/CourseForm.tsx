@@ -29,8 +29,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { Plus, Trash2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuthStore } from "@/store/authStore";
-import { requireAdminAuth } from "@/middleware/adminAuth";
+import { useAuth } from "@/hooks/useAuth";
 
 const lessonSchema = z.object({
   title: z.string().min(1, "Lesson title is required"),
@@ -136,7 +135,7 @@ export default function CourseForm() {
   const { id } = useParams();
   const isEdit = Boolean(id);
   const [categories, setCategories] = useState<any[]>([]);
-  const { user } = useAuthStore();
+  const { user } = useAuth();
 
   const form = useForm<CourseFormData>({
     resolver: zodResolver(courseSchema),
@@ -287,6 +286,18 @@ export default function CourseForm() {
 
   const onSubmit = async (data: CourseFormData) => {
     try {
+      console.log('CourseForm Debug:', {
+        user: user?.id,
+        userExists: !!user,
+        formData: data
+      });
+
+      if (!user) {
+        console.error('CourseForm: No user found in auth store');
+        toast.error('Authentication error - please log in again');
+        return;
+      }
+
       console.log('Form data being submitted:', data);
 
       // Create slug from title
