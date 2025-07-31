@@ -15,6 +15,7 @@ interface Course {
   title: string;
   description: string;
   thumbnail_url: string;
+  slug?: string;
   total_lessons: number;
   total_duration: number;
   price: number;
@@ -201,7 +202,10 @@ export default function StudentCourses() {
                           </div>
                         </div>
 
-                        <Button className="w-full">
+                        <Button 
+                          className="w-full"
+                          onClick={() => window.location.href = `/learn/${course.slug || course.id}`}
+                        >
                           <Play className="mr-2 h-4 w-4" />
                           Continue Learning
                         </Button>

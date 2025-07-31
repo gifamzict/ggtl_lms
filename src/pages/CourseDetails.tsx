@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import ReactPlayer from 'react-player';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +30,7 @@ interface Course {
   title: string;
   description: string;
   thumbnail_url: string;
+  demo_video_url?: string;
   total_lessons: number;
   total_duration: number;
   price: number;
@@ -275,25 +277,45 @@ const CourseDetails = () => {
               </div>
             </div>
 
-            {/* Course Preview */}
+            {/* Course Preview / Demo Video */}
             <Card>
               <CardContent className="p-0">
-                <div className="aspect-video bg-muted flex items-center justify-center relative">
-                  {course.thumbnail_url ? (
-                    <img 
-                      src={course.thumbnail_url} 
-                      alt={course.title}
-                      className="w-full h-full object-cover"
+                <div className="aspect-video bg-black relative">
+                  {course.demo_video_url ? (
+                    <ReactPlayer
+                      url={course.demo_video_url}
+                      width="100%"
+                      height="100%"
+                      controls
+                      light={course.thumbnail_url}
+                      playIcon={
+                        <div className="flex items-center justify-center w-16 h-16 bg-white/90 rounded-full">
+                          <Play className="w-8 h-8 text-black ml-1" />
+                        </div>
+                      }
                     />
+                  ) : course.thumbnail_url ? (
+                    <div className="relative w-full h-full">
+                      <img 
+                        src={course.thumbnail_url} 
+                        alt={course.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                        <div className="text-center text-white">
+                          <Play className="w-16 h-16 mx-auto mb-2" />
+                          <p>Course Preview</p>
+                        </div>
+                      </div>
+                    </div>
                   ) : (
-                    <div className="text-center">
-                      <Play className="w-16 h-16 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-muted-foreground">Course Preview</p>
+                    <div className="w-full h-full flex items-center justify-center text-white">
+                      <div className="text-center">
+                        <Play className="w-16 h-16 mx-auto mb-2" />
+                        <p>Course Preview</p>
+                      </div>
                     </div>
                   )}
-                  <Button className="absolute inset-0 bg-black/50 hover:bg-black/70">
-                    <Play className="w-8 h-8" />
-                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -447,9 +469,9 @@ const CourseDetails = () => {
                   {isEnrolled ? (
                     <Button 
                       className="w-full" 
-                      onClick={() => navigate('/student/courses')}
+                      onClick={() => navigate(`/learn/${course.slug}`)}
                     >
-                      Go to Course
+                      Continue Learning
                     </Button>
                   ) : (
                     <>
