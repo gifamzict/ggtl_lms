@@ -13,7 +13,7 @@ export default function AboutUs() {
       backgroundImage: `url(${aboutHero})`
     }}>
         <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-primary/70"></div>
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-20"></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] absolute "></div>
         <div className="container mx-auto px-4 relative z-10">
           <motion.div className="text-center" initial={{
           opacity: 0,
@@ -25,12 +25,12 @@ export default function AboutUs() {
           duration: 0.8
         }}>
             <div className="flex items-center justify-center space-x-2 text-white/90 mb-4">
-              <span>HOME</span>
+              <span className="text-slate-900">HOME</span>
               <span>•</span>
-              <span>ABOUT US</span>
+              <span className="text-slate-900">ABOUT US</span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">ABOUT US</h1>
-            <p className="text-xl text-white/90 max-w-3xl mx-auto leading-relaxed">
+            <h1 className="text-5xl font-bold mb-6 md:text-6xl text-slate-950">ABOUT US</h1>
+            <p className="text-xl max-w-3xl mx-auto leading-relaxed text-slate-950">
               Empowering the next generation of tech professionals across Africa through 
               world-class education and practical skills development.
             </p>
