@@ -58,7 +58,7 @@ export function StudentSidebar() {
   return <Sidebar className={state === "collapsed" ? "w-14" : "w-60"} collapsible="icon">
       <SidebarTrigger className="m-2 self-end" />
 
-      <SidebarContent className="bg-slate-50">
+      <SidebarContent className="bg-gray-600">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -66,7 +66,7 @@ export function StudentSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClassName}>
                       <item.icon className="mr-2 h-4 w-4" />
-                      {state !== "collapsed" && <span>{item.title}</span>}
+                      {state !== "collapsed" && <span className="text-slate-50">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>)}
@@ -74,7 +74,7 @@ export function StudentSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={handleSignOut} className="text-sidebar-foreground hover:bg-destructive hover:text-destructive-foreground">
                   <LogOut className="mr-2 h-4 w-4" />
-                  {state !== "collapsed" && <span>Sign Out</span>}
+                  {state !== "collapsed" && <span className="text-slate-50">Sign Out</span>}
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
