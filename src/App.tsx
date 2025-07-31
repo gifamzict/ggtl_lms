@@ -14,6 +14,7 @@ import CoursesManagement from "./pages/admin/CoursesManagement";
 import CourseForm from "./pages/admin/CourseForm";
 import CourseCategories from "./pages/admin/CourseCategories";
 import AdminLogin from "./pages/admin/AdminLogin";
+import AdminSignup from "./pages/admin/AdminSignup";
 import ManageAdmins from "./pages/admin/ManageAdmins";
 import Students from "./pages/admin/Students";
 import AdminProfile from "./pages/admin/AdminProfile";
@@ -36,8 +37,9 @@ const App = () => (
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<Auth />} />
-                  <Route path="/admin/login" element={<AdminLogin />} />
-                  <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/signup" element={<AdminSignup />} />
+          <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="/admin/courses" element={<CoursesManagement />} />
                   <Route path="/admin/courses/new" element={<CourseForm />} />
                   <Route path="/admin/courses/edit/:id" element={<CourseForm />} />

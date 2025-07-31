@@ -131,7 +131,15 @@ export default function AdminLogin() {
               </motion.div>
             </form>
 
-            <div className="mt-6 text-center">
+            <div className="mt-6 space-y-3 text-center">
+              <Button
+                variant="link"
+                onClick={() => navigate('/admin/signup')}
+                className="text-sm text-muted-foreground hover:text-primary block w-full"
+              >
+                Create Initial Super Admin Account
+              </Button>
+              
               <Button
                 variant="link"
                 onClick={() => navigate('/')}
