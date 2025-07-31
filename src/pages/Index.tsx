@@ -78,6 +78,7 @@ const Index = () => {
 
     fetchData();
   }, []);
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -86,6 +87,7 @@ const Index = () => {
         </div>
       </div>;
   }
+
   const features = [{
     icon: <BookOpen className="h-8 w-8" />,
     title: "Expert-Led Courses",
