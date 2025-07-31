@@ -35,6 +35,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { requireAdminAuth } from "@/middleware/adminAuth";
 
 interface Course {
   id: string;
@@ -58,6 +59,9 @@ export default function CoursesManagement() {
   const fetchCourses = async () => {
     try {
       setLoading(true);
+      
+      // Verify admin permissions before fetching
+      await requireAdminAuth();
       const { data: courses, error } = await supabase
         .from('courses')
         .select(`
@@ -97,6 +101,9 @@ export default function CoursesManagement() {
 
   const handleStatusToggle = async (courseId: string, newStatus: boolean) => {
     try {
+      // Verify admin permissions before updating
+      await requireAdminAuth();
+      
       const status = newStatus ? 'PUBLISHED' : 'DRAFT';
       const { error } = await supabase
         .from('courses')

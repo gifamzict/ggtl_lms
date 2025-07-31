@@ -4,7 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from '@/hooks/useAuth';
-import { Navbar } from '@/components/layout/Navbar';
+import { PublicNavbar } from '@/components/layout/PublicNavbar';
+import { useLocation } from 'react-router-dom';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { ThemeProvider } from './components/ThemeProvider';
 import Index from "./pages/Index";
@@ -18,22 +19,19 @@ import AdminSignup from "./pages/admin/AdminSignup";
 import ManageAdmins from "./pages/admin/ManageAdmins";
 import Students from "./pages/admin/Students";
 import AdminProfile from "./pages/admin/AdminProfile";
-import StudentDashboard from "./pages/StudentDashboard";
+import StudentDashboard from "./pages/student/StudentDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <div className="min-h-screen bg-background">
-              <Navbar />
-              <main>
+const AppContent = () => {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
+  return (
+    <div className="min-h-screen bg-background">
+      {!isAdminRoute && <PublicNavbar />}
+      <main>
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<Auth />} />
@@ -51,9 +49,21 @@ const App = () => (
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-              </main>
-              <AuthModal />
-            </div>
+        </main>
+        <AuthModal />
+      </div>
+    );
+};
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AppContent />
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
