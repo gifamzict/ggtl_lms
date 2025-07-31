@@ -15,6 +15,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import CoursesManagement from "./pages/admin/CoursesManagement";
 import CourseForm from "./pages/admin/CourseForm";
 import CourseCategories from "./pages/admin/CourseCategories";
+import StudentDashboard from "./pages/StudentDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -64,6 +65,7 @@ const App = () => (
         <Route path="/admin/courses/new" element={<CourseForm />} />
         <Route path="/admin/courses/edit/:id" element={<CourseForm />} />
         <Route path="/admin/course-categories" element={<CourseCategories />} />
+        <Route path="/student/dashboard" element={<StudentDashboard />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

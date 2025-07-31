@@ -1,0 +1,95 @@
+import { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarTrigger,
+  useSidebar,
+} from "@/components/ui/sidebar";
+import { 
+  LayoutDashboard, 
+  User, 
+  BookOpen, 
+  ShoppingCart,
+  MessageSquare,
+  LogOut,
+  Settings
+} from "lucide-react";
+import { useAuthStore } from "@/store/authStore";
+import { authService } from "@/services/authService";
+import { toast } from "sonner";
+
+const navigationItems = [
+  { title: "Dashboard", url: "/student/dashboard", icon: LayoutDashboard },
+  { title: "Profile", url: "/student/profile", icon: User },
+  { title: "Enrolled Courses", url: "/student/courses", icon: BookOpen },
+  { title: "Orders", url: "/student/orders", icon: ShoppingCart },
+  { title: "Reviews", url: "/student/reviews", icon: MessageSquare },
+  { title: "Settings", url: "/student/settings", icon: Settings },
+];
+
+export function StudentSidebar() {
+  const { state } = useSidebar();
+  const navigate = useNavigate();
+  const { setUser, setSession } = useAuthStore();
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await authService.signOut();
+      if (error) throw error;
+      
+      setUser(null);
+      setSession(null);
+      navigate('/');
+      toast.success('Signed out successfully');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast.error('Failed to sign out');
+    }
+  };
+
+  const getNavClassName = ({ isActive }: { isActive: boolean }) =>
+    isActive 
+      ? "bg-primary text-primary-foreground font-medium" 
+      : "hover:bg-accent hover:text-accent-foreground";
+
+  return (
+    <Sidebar
+      className={state === "collapsed" ? "w-14" : "w-60"}
+      collapsible="icon"
+    >
+      <SidebarTrigger className="m-2 self-end" />
+
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navigationItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink to={item.url} className={getNavClassName}>
+                      <item.icon className="mr-2 h-4 w-4" />
+                      {state !== "collapsed" && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+              
+              <SidebarMenuItem>
+                <SidebarMenuButton onClick={handleSignOut} className="hover:bg-destructive hover:text-destructive-foreground">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  {state !== "collapsed" && <span>Sign Out</span>}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
+  );
+}
