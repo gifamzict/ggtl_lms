@@ -2,6 +2,7 @@ import { useState, useEffect, createContext, useContext, ReactNode } from 'react
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { useAuthStore } from '@/store/authStore';
 
 interface UserProfile {
   id: string;
@@ -34,6 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const { setUser: setStoreUser, setSession: setStoreSession, setLoading: setStoreLoading } = useAuthStore();
 
   const fetchUserProfile = async (userId: string) => {
     try {
@@ -61,6 +63,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        // Sync with auth store
+        setStoreSession(session);
+        setStoreUser(session?.user ?? null);
         
         if (session?.user) {
           // Defer profile fetching to prevent deadlocks
@@ -68,10 +73,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const profile = await fetchUserProfile(session.user.id);
             setUserProfile(profile);
             setLoading(false);
+            setStoreLoading(false);
           }, 0);
         } else {
           setUserProfile(null);
           setLoading(false);
+          setStoreLoading(false);
         }
       }
     );
@@ -80,16 +87,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      // Sync with auth store
+      setStoreSession(session);
+      setStoreUser(session?.user ?? null);
       
       if (session?.user) {
         const profile = await fetchUserProfile(session.user.id);
         setUserProfile(profile);
       }
       setLoading(false);
+      setStoreLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [setStoreUser, setStoreSession, setStoreLoading]);
 
   const signUp = async (email: string, password: string, fullName: string, role: string = 'STUDENT') => {
     const redirectUrl = `${window.location.origin}/`;

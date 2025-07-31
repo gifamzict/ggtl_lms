@@ -20,8 +20,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAuth } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/authStore';
-import { authService } from '@/services/authService';
 import { toast } from 'sonner';
 
 const categories = [
@@ -38,21 +38,12 @@ const categories = [
 ];
 
 export function PublicNavbar() {
-  const { user, openAuthModal, setUser, setSession } = useAuthStore();
+  const { user, signOut } = useAuth();
+  const { openAuthModal } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSignOut = async () => {
-    try {
-      const { error } = await authService.signOut();
-      if (error) throw error;
-      
-      setUser(null);
-      setSession(null);
-      toast.success('Signed out successfully');
-    } catch (error) {
-      console.error('Error signing out:', error);
-      toast.error('Failed to sign out');
-    }
+    await signOut();
   };
 
   const getUserDisplayName = () => {
