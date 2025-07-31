@@ -1,16 +1,49 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookOpen, Users, Award, TrendingUp, Target, Zap, Play, Star, Clock, CheckCircle, ArrowRight, Globe, Shield, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import heroImage from '@/assets/hero-learning.jpg';
 import codingImage from '@/assets/coding-workspace.jpg';
 import studentImage from '@/assets/student-success.jpg';
 
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 const Index = () => {
   const { user, loading } = useAuth();
   const { openAuthModal } = useAuthStore();
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('categories')
+          .select('*')
+          .order('name')
+          .limit(4);
+
+        if (error) {
+          console.error('Error fetching categories:', error);
+          return;
+        }
+
+        setCategories(data || []);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   if (loading) {
     return (
@@ -270,11 +303,14 @@ const Index = () => {
               Discover our most-loved courses that have helped thousands of students advance their careers.
             </p>
             <div className="flex justify-center gap-3 flex-wrap">
-              <Button variant="default" size="sm">All Courses</Button>
-              <Button variant="outline" size="sm">Web Development</Button>
-              <Button variant="outline" size="sm">Data Science</Button>
-              <Button variant="outline" size="sm">Design</Button>
-              <Button variant="outline" size="sm">Business</Button>
+              <Button variant="default" size="sm" asChild>
+                <Link to="/courses">All Courses</Link>
+              </Button>
+              {categories.map((category) => (
+                <Button key={category.id} variant="outline" size="sm" asChild>
+                  <Link to={`/courses?category=${category.id}`}>{category.name}</Link>
+                </Button>
+              ))}
             </div>
           </div>
           

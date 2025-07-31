@@ -25,6 +25,7 @@ import Students from "./pages/admin/Students";
 import AdminProfile from "./pages/admin/AdminProfile";
 import StudentDashboard from "./pages/student/StudentDashboard";
 import StudentCourses from "./pages/student/StudentCourses";
+import Courses from "./pages/Courses";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const AppContent = () => {
       <main>
                 <Routes>
                   <Route path="/" element={<Index />} />
+                  <Route path="/courses" element={<Courses />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/about-us" element={<AboutUs />} />
                   <Route path="/contact-us" element={<ContactUs />} />

@@ -25,7 +25,6 @@ import { authService } from "@/services/authService";
 import { toast } from "sonner";
 
 const navigationItems = [
-  { title: "Dashboard", url: "/student/dashboard", icon: LayoutDashboard },
   { title: "Profile", url: "/student/profile", icon: User },
   { title: "Enrolled Courses", url: "/student/courses", icon: BookOpen },
   { title: "Orders", url: "/student/orders", icon: ShoppingCart },
@@ -56,7 +55,7 @@ export function StudentSidebar() {
   const getNavClassName = ({ isActive }: { isActive: boolean }) =>
     isActive 
       ? "bg-primary text-primary-foreground font-medium" 
-      : "hover:bg-accent hover:text-accent-foreground";
+      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground";
 
   return (
     <Sidebar
@@ -81,7 +80,7 @@ export function StudentSidebar() {
               ))}
               
               <SidebarMenuItem>
-                <SidebarMenuButton onClick={handleSignOut} className="hover:bg-destructive hover:text-destructive-foreground">
+                <SidebarMenuButton onClick={handleSignOut} className="text-sidebar-foreground hover:bg-destructive hover:text-destructive-foreground">
                   <LogOut className="mr-2 h-4 w-4" />
                   {state !== "collapsed" && <span>Sign Out</span>}
                 </SidebarMenuButton>
