@@ -135,14 +135,12 @@ export default function CourseForm() {
   const { id } = useParams();
   const isEdit = Boolean(id);
   const [categories, setCategories] = useState<any[]>([]);
-  const [instructors, setInstructors] = useState<any[]>([]);
 
   const form = useForm<CourseFormData>({
     resolver: zodResolver(courseSchema),
     defaultValues: {
       title: "",
       description: "",
-      instructor: "",
       isFree: false,
       price: 0,
       category: "",
@@ -169,13 +167,8 @@ export default function CourseForm() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [categoriesRes, profilesRes] = await Promise.all([
-          supabase.from('categories').select('*'),
-          supabase.from('profiles').select('*').eq('role', 'INSTRUCTOR'),
-        ]);
-
+        const categoriesRes = await supabase.from('categories').select('*');
         if (categoriesRes.data) setCategories(categoriesRes.data);
-        if (profilesRes.data) setInstructors(profilesRes.data);
       } catch (error) {
         console.error('Error fetching data:', error);
         toast.error('Failed to load form data');
@@ -382,32 +375,7 @@ export default function CourseForm() {
                     )}
                   />
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="instructor"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Instructor</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select instructor" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {instructors.map((instructor) => (
-                                <SelectItem key={instructor.id} value={instructor.user_id}>
-                                  {instructor.full_name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField
                       control={form.control}
                       name="category"
