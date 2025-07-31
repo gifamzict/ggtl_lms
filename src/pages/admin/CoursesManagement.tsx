@@ -31,8 +31,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Plus, MoreVertical, Edit, Trash2, Search } from "lucide-react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { AdminHeader } from "@/components/admin/AdminHeader";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { requireAdminAuth } from "@/middleware/adminAuth";
@@ -243,22 +243,20 @@ export default function CoursesManagement() {
         <AdminSidebar />
         
         <main className="flex-1 p-6">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <h1 className="text-3xl font-bold text-foreground">Courses Management</h1>
-            <div className="flex items-center gap-4">
-              <ThemeToggle />
-              <Button 
-                onClick={() => {
-                  navigate("/admin/courses/new");
-                  // Refresh courses when coming back
-                  setTimeout(() => fetchCourses(), 100);
-                }}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add New Course
-              </Button>
-            </div>
+          <AdminHeader title="Courses Management" />
+          
+          {/* Quick Actions */}
+          <div className="flex justify-end mb-6">
+            <Button 
+              onClick={() => {
+                navigate("/admin/courses/new");
+                // Refresh courses when coming back
+                setTimeout(() => fetchCourses(), 100);
+              }}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add New Course
+            </Button>
           </div>
 
           <Card>

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   BarChart, 
@@ -13,9 +12,11 @@ import {
   ComposedChart
 } from "recharts";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { AdminHeader } from "@/components/admin/AdminHeader";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { Skeleton } from "@/components/ui/skeleton";
 import { DollarSign, ShoppingCart, BookOpen, Users, CheckCircle, XCircle } from "lucide-react";
+import { useAdminStats } from "@/hooks/useAdminStats";
 
 const chartData = [
   { month: "Jan", orderAmount: 0, orderCount: 0 },
@@ -80,11 +81,7 @@ const StatCard = ({ title, value, icon, currency }: StatCardProps) => (
 );
 
 export default function AdminDashboard() {
-  // Mock course statistics - can be replaced with real data
-  const totalCourses = 71;
-  const pendingCourses = 5;
-  const rejectedCourses = 2;
-  const activeCourses = totalCourses - pendingCourses - rejectedCourses;
+  const { stats, loading: statsLoading, error } = useAdminStats();
 
   return (
     <SidebarProvider>
@@ -92,54 +89,71 @@ export default function AdminDashboard() {
         <AdminSidebar />
         
         <main className="flex-1 p-6">
-          <div className="flex items-center justify-between mb-8">
-            <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-            <ThemeToggle />
-          </div>
+          <AdminHeader title="Dashboard" />
 
           {/* KPI Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <StatCard
-              title="Today's Orders"
-              value="NO"
-              icon={<DollarSign className="w-6 h-6" />}
-            />
-            <StatCard
-              title="This weeks Orders"
-              value="NO"
-              icon={<DollarSign className="w-6 h-6" />}
-            />
-            <StatCard
-              title="Monthly Orders"
-              value="NO"
-              icon={<DollarSign className="w-6 h-6" />}
-            />
-            <StatCard
-              title="This Year's Orders"
-              value="110411"
-              icon={<DollarSign className="w-6 h-6" />}
-              currency="₦"
-            />
-            <StatCard
-              title="Total Orders"
-              value="16"
-              icon={<ShoppingCart className="w-6 h-6" />}
-            />
-            <StatCard
-              title="Pending Courses"
-              value={pendingCourses}
-              icon={<BookOpen className="w-6 h-6" />}
-            />
-            <StatCard
-              title="Rejected Courses"
-              value={rejectedCourses}
-              icon={<XCircle className="w-6 h-6" />}
-            />
-            <StatCard
-              title="Total Courses"
-              value={totalCourses}
-              icon={<BookOpen className="w-6 h-6" />}
-            />
+            {statsLoading ? (
+              // Loading skeletons
+              Array.from({ length: 8 }).map((_, i) => (
+                <Card key={i} className="bg-card border-border">
+                  <CardContent className="flex items-center justify-between p-6">
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-8 w-16" />
+                    </div>
+                    <Skeleton className="h-12 w-12 rounded-lg" />
+                  </CardContent>
+                </Card>
+              ))
+            ) : error ? (
+              <div className="col-span-full text-center py-8">
+                <p className="text-destructive">Error loading statistics: {error}</p>
+              </div>
+            ) : (
+              <>
+                <StatCard
+                  title="Today's Orders"
+                  value={stats.todayOrders}
+                  icon={<DollarSign className="w-6 h-6" />}
+                />
+                <StatCard
+                  title="This Week's Orders"
+                  value={stats.thisWeekOrders}
+                  icon={<DollarSign className="w-6 h-6" />}
+                />
+                <StatCard
+                  title="This Month's Orders"
+                  value={stats.thisMonthOrders}
+                  icon={<DollarSign className="w-6 h-6" />}
+                />
+                <StatCard
+                  title="Total Orders"
+                  value={stats.totalOrders}
+                  icon={<ShoppingCart className="w-6 h-6" />}
+                />
+                <StatCard
+                  title="Total Courses"
+                  value={stats.totalCourses}
+                  icon={<BookOpen className="w-6 h-6" />}
+                />
+                <StatCard
+                  title="Pending Courses"
+                  value={stats.pendingCourses}
+                  icon={<BookOpen className="w-6 h-6" />}
+                />
+                <StatCard
+                  title="Rejected Courses"
+                  value={stats.rejectedCourses}
+                  icon={<XCircle className="w-6 h-6" />}
+                />
+                <StatCard
+                  title="Active Courses"
+                  value={stats.activeCourses}
+                  icon={<CheckCircle className="w-6 h-6" />}
+                />
+              </>
+            )}
           </div>
 
           {/* Main Chart */}
