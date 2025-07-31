@@ -218,7 +218,28 @@ const CourseLearning = () => {
   const getVideoUrl = (lesson: Lesson) => {
     switch (lesson.video_source) {
       case 'DRIVE':
-        return lesson.video_url.replace('/view', '/preview');
+        // Extract file ID from various Google Drive URL formats
+        const url = lesson.video_url;
+        let fileId = '';
+        
+        // Handle different Google Drive URL formats
+        if (url.includes('/view')) {
+          fileId = url.split('/d/')[1]?.split('/view')[0];
+        } else if (url.includes('id=')) {
+          fileId = url.split('id=')[1]?.split('&')[0];
+        } else if (url.includes('/file/d/')) {
+          fileId = url.split('/file/d/')[1]?.split('/')[0];
+        }
+        
+        if (fileId) {
+          console.log('Original URL:', url);
+          console.log('Extracted File ID:', fileId);
+          const previewUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+          console.log('Preview URL:', previewUrl);
+          return previewUrl;
+        }
+        
+        return lesson.video_url;
       case 'UPLOAD':
         return lesson.video_url;
       default:

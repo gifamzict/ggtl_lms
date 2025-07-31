@@ -97,6 +97,18 @@ const CourseDetails = () => {
       if (courseError) throw courseError;
       setCourse(courseData);
 
+      // Check if user is enrolled (only if user is logged in)
+      if (user) {
+        const { data: enrollmentData } = await supabase
+          .from('enrollments')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('course_id', courseData.id)
+          .single();
+        
+        setIsEnrolled(!!enrollmentData);
+      }
+
       // Fetch lessons grouped by sections (simplified for now)
       const { data: lessonsData, error: lessonsError } = await supabase
         .from('lessons')
