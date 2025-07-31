@@ -318,23 +318,35 @@ const CourseLearning = () => {
         <div className="flex-1 flex flex-col">
           <div className="flex-1 bg-black flex items-center justify-center">
             <div className="w-full max-w-5xl aspect-video">
-              <ReactPlayer
-                url={getVideoUrl(currentLesson)}
-                width="100%"
-                height="100%"
-                controls
-                playing={isPlaying}
-                onPlay={() => setIsPlaying(true)}
-                onPause={() => setIsPlaying(false)}
-                onProgress={handleProgress}
-                onEnded={handleEnded}
-                onStart={() => {
-                  const progress = lessonProgress.get(currentLesson.id);
-                  if (progress?.watched_duration) {
-                    // Resume from last position
-                  }
-                }}
-              />
+              {currentLesson.video_source === 'DRIVE' ? (
+                <iframe
+                  src={getVideoUrl(currentLesson)}
+                  width="100%"
+                  height="100%"
+                  frameBorder="0"
+                  allow="autoplay"
+                  className="rounded-lg"
+                  title={currentLesson.title}
+                />
+              ) : (
+                <ReactPlayer
+                  url={getVideoUrl(currentLesson)}
+                  width="100%"
+                  height="100%"
+                  controls
+                  playing={isPlaying}
+                  onPlay={() => setIsPlaying(true)}
+                  onPause={() => setIsPlaying(false)}
+                  onProgress={handleProgress}
+                  onEnded={handleEnded}
+                  onStart={() => {
+                    const progress = lessonProgress.get(currentLesson.id);
+                    if (progress?.watched_duration) {
+                      // Resume from last position
+                    }
+                  }}
+                />
+              )}
             </div>
           </div>
           

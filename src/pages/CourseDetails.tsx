@@ -294,18 +294,33 @@ const CourseDetails = () => {
               <CardContent className="p-0">
                 <div className="aspect-video bg-black relative">
                   {course.demo_video_url ? (
-                    <ReactPlayer
-                      url={course.demo_video_url}
-                      width="100%"
-                      height="100%"
-                      controls
-                      light={course.thumbnail_url}
-                      playIcon={
-                        <div className="flex items-center justify-center w-16 h-16 bg-white/90 rounded-full">
-                          <Play className="w-8 h-8 text-black ml-1" />
-                        </div>
-                      }
-                    />
+                    course.demo_video_url.includes('drive.google.com') ? (
+                      <iframe
+                        src={course.demo_video_url.includes('/preview') ? 
+                          course.demo_video_url : 
+                          course.demo_video_url.replace('/view', '/preview')
+                        }
+                        width="100%"
+                        height="100%"
+                        frameBorder="0"
+                        allow="autoplay"
+                        className="rounded-lg"
+                        title={`${course.title} preview`}
+                      />
+                    ) : (
+                      <ReactPlayer
+                        url={course.demo_video_url}
+                        width="100%"
+                        height="100%"
+                        controls
+                        light={course.thumbnail_url}
+                        playIcon={
+                          <div className="flex items-center justify-center w-16 h-16 bg-white/90 rounded-full">
+                            <Play className="w-8 h-8 text-black ml-1" />
+                          </div>
+                        }
+                      />
+                    )
                   ) : course.thumbnail_url ? (
                     <div className="relative w-full h-full">
                       <img 
