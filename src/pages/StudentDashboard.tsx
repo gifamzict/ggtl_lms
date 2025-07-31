@@ -18,6 +18,8 @@ import {
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { StudentSidebar } from "@/components/student/StudentSidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface EnrolledCourse {
   id: string;
@@ -27,6 +29,8 @@ interface EnrolledCourse {
   thumbnail: string;
   totalLessons: number;
   completedLessons: number;
+  price: number;
+  isFree: boolean;
 }
 
 export default function StudentDashboard() {
@@ -37,36 +41,73 @@ export default function StudentDashboard() {
     totalReviews: 0,
     totalOrders: 0
   });
+  const [loading, setLoading] = useState(true);
 
-  // Mock data for now - replace with actual API calls
+  // Fetch enrolled courses and stats
   useEffect(() => {
-    setEnrolledCourses([
-      {
-        id: "1",
-        title: "React Development Fundamentals",
-        instructor: "John Doe",
-        progress: 75,
-        thumbnail: "/lovable-uploads/bd0b0eb0-6cfd-4fc4-81b8-d4b8002811c9.png",
-        totalLessons: 24,
-        completedLessons: 18
-      },
-      {
-        id: "2", 
-        title: "Advanced JavaScript Concepts",
-        instructor: "Jane Smith",
-        progress: 45,
-        thumbnail: "/lovable-uploads/bd0b0eb0-6cfd-4fc4-81b8-d4b8002811c9.png",
-        totalLessons: 30,
-        completedLessons: 14
-      }
-    ]);
+    const fetchStudentData = async () => {
+      if (!user) return;
 
-    setStats({
-      enrolledCourses: 2,
-      totalReviews: 0,
-      totalOrders: 0
-    });
-  }, []);
+      try {
+        setLoading(true);
+
+        // Fetch enrollments with course data
+        const { data: enrollments, error: enrollmentsError } = await supabase
+          .from('enrollments')
+          .select(`
+            id,
+            progress_percentage,
+            enrolled_at,
+            completed_at,
+            courses (
+              id,
+              title,
+              thumbnail_url,
+              total_lessons,
+              price,
+              status
+            )
+          `)
+          .eq('user_id', user.id);
+
+        if (enrollmentsError) {
+          console.error('Error fetching enrollments:', enrollmentsError);
+          toast.error('Failed to load your courses');
+          return;
+        }
+
+        // Transform enrollments data
+        const coursesData: EnrolledCourse[] = (enrollments || []).map((enrollment: any) => ({
+          id: enrollment.courses.id,
+          title: enrollment.courses.title,
+          instructor: "Admin", // Since admin creates all courses
+          progress: enrollment.progress_percentage || 0,
+          thumbnail: enrollment.courses.thumbnail_url || "/lovable-uploads/bd0b0eb0-6cfd-4fc4-81b8-d4b8002811c9.png",
+          totalLessons: enrollment.courses.total_lessons || 0,
+          completedLessons: Math.floor((enrollment.progress_percentage || 0) * (enrollment.courses.total_lessons || 0) / 100),
+          price: enrollment.courses.price || 0,
+          isFree: (enrollment.courses.price || 0) === 0
+        }));
+
+        setEnrolledCourses(coursesData);
+
+        // Update stats
+        setStats({
+          enrolledCourses: coursesData.length,
+          totalReviews: 0, // To be implemented when reviews are added
+          totalOrders: coursesData.filter(course => !course.isFree).length
+        });
+
+      } catch (error) {
+        console.error('Error fetching student data:', error);
+        toast.error('Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudentData();
+  }, [user]);
 
   return (
     <SidebarProvider>
@@ -165,12 +206,17 @@ export default function StudentDashboard() {
             </Card>
 
             {/* Enrolled Courses Section */}
-            {enrolledCourses.length > 0 && (
-              <Card className="mt-6">
-                <CardHeader>
-                  <CardTitle>My Enrolled Courses</CardTitle>
-                </CardHeader>
-                <CardContent>
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle>My Enrolled Courses</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="text-center p-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                    <p className="text-muted-foreground mt-2">Loading your courses...</p>
+                  </div>
+                ) : enrolledCourses.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {enrolledCourses.map((course) => (
                       <Card key={course.id} className="hover:shadow-lg transition-shadow">
@@ -181,7 +227,20 @@ export default function StudentDashboard() {
                             className="w-full h-40 object-cover rounded-lg mb-3"
                           />
                           <h4 className="font-semibold mb-2 line-clamp-2">{course.title}</h4>
-                          <p className="text-sm text-muted-foreground mb-3">by {course.instructor}</p>
+                          <p className="text-sm text-muted-foreground mb-2">by {course.instructor}</p>
+                          
+                          {/* Price Display */}
+                          <div className="mb-3">
+                            {course.isFree ? (
+                              <Badge variant="secondary" className="bg-green-100 text-green-800">
+                                Free
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline">
+                                ₦{course.price.toLocaleString()}
+                              </Badge>
+                            )}
+                          </div>
                           
                           <div className="space-y-2">
                             <div className="flex justify-between text-sm">
@@ -202,9 +261,18 @@ export default function StudentDashboard() {
                       </Card>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                ) : (
+                  <div className="text-center p-8">
+                    <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No Enrolled Courses</h3>
+                    <p className="text-muted-foreground mb-4">
+                      You haven't enrolled in any courses yet. Start your learning journey today!
+                    </p>
+                    <Button>Browse Courses</Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </main>
       </div>

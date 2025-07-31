@@ -33,7 +33,7 @@ import { supabase } from "@/integrations/supabase/client";
 const lessonSchema = z.object({
   title: z.string().min(1, "Lesson title is required"),
   videoUrl: z.string().url("Please enter a valid video URL"),
-  videoSource: z.enum(["YOUTUBE", "VIMEO", "GOOGLE_DRIVE"]),
+  videoSource: z.enum(["YOUTUBE", "VIMEO", "DRIVE"]),
   duration: z.string().min(1, "Duration is required"),
   description: z.string().optional(),
 });
@@ -46,7 +46,6 @@ const sectionSchema = z.object({
 const courseSchema = z.object({
   title: z.string().min(1, "Course title is required"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  //instructor: z.string().min(1, "Please select an instructor"),
   isFree: z.boolean(),
   price: z.coerce.number().min(0, "Price must be a positive number").optional(),
   category: z.string().min(1, "Please select a category"),
@@ -69,7 +68,7 @@ type CourseFormData = z.infer<typeof courseSchema>;
 
 // Video source options
 const videoSources = [
-  { id: "GOOGLE_DRIVE", name: "Google Drive" },
+  { id: "DRIVE", name: "Google Drive" },
   { id: "YOUTUBE", name: "YouTube" },
   { id: "VIMEO", name: "Vimeo" },
 ];
@@ -154,7 +153,7 @@ export default function CourseForm() {
           lessons: [{ 
             title: "", 
             videoUrl: "", 
-            videoSource: "GOOGLE_DRIVE" as const,
+            videoSource: "DRIVE" as const,
             duration: "",
             description: "",
           }],
@@ -169,6 +168,73 @@ export default function CourseForm() {
       try {
         const categoriesRes = await supabase.from('categories').select('*');
         if (categoriesRes.data) setCategories(categoriesRes.data);
+        
+        // If editing, fetch course data
+        if (isEdit && id) {
+          const { data: course, error } = await supabase
+            .from('courses')
+            .select(`
+              *,
+              lessons (
+                id,
+                title,
+                video_url,
+                video_source,
+                duration,
+                description,
+                position
+              )
+            `)
+            .eq('id', id)
+            .single();
+
+          if (error) {
+            console.error('Error fetching course:', error);
+            toast.error('Failed to load course data');
+            return;
+          }
+
+          if (course) {
+            // Transform the data to match our form structure
+            const formData = {
+              title: course.title || "",
+              description: course.description || "",
+              isFree: course.price === 0,
+              price: course.price || 0,
+              category: course.category_id || "",
+              language: "en", // Default until we have language data
+              level: "beginner", // Default until we have level data
+              thumbnailUrl: course.thumbnail_url || "",
+              demoVideoUrl: "", // Add when available in database
+              sections: course.lessons && course.lessons.length > 0 
+                ? [{ 
+                    title: "Course Content",
+                    lessons: course.lessons
+                      .sort((a, b) => a.position - b.position)
+                      .map(lesson => ({
+                        title: lesson.title,
+                        videoUrl: lesson.video_url,
+                        videoSource: lesson.video_source as "YOUTUBE" | "VIMEO" | "DRIVE",
+                        duration: formatDuration(lesson.duration || 0),
+                        description: lesson.description || "",
+                      }))
+                  }]
+                : [{
+                    title: "Introduction",
+                    lessons: [{ 
+                      title: "", 
+                      videoUrl: "", 
+                      videoSource: "DRIVE" as const,
+                      duration: "",
+                      description: "",
+                    }],
+                  }]
+            };
+
+            // Reset form with fetched data
+            form.reset(formData);
+          }
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
         toast.error('Failed to load form data');
@@ -176,7 +242,7 @@ export default function CourseForm() {
     };
 
     fetchData();
-  }, []);
+  }, [isEdit, id, form]);
 
   const { fields: sections, append: appendSection, remove: removeSection } = useFieldArray({
     control: form.control,
@@ -189,7 +255,7 @@ export default function CourseForm() {
       lessons: [{ 
         title: "", 
         videoUrl: "", 
-        videoSource: "GOOGLE_DRIVE" as const,
+        videoSource: "DRIVE" as const,
         duration: "",
         description: "",
       }],
@@ -202,7 +268,7 @@ export default function CourseForm() {
     updatedSections[sectionIndex].lessons.push({ 
       title: "", 
       videoUrl: "", 
-      videoSource: "GOOGLE_DRIVE" as const,
+      videoSource: "DRIVE" as const,
       duration: "",
       description: "",
     });
@@ -218,22 +284,83 @@ export default function CourseForm() {
 
   const onSubmit = async (data: CourseFormData) => {
     try {
-      // Process lessons with duration conversion and URL formatting
-      const processedData = {
-        ...data,
-        sections: data.sections.map(section => ({
-          ...section,
-          lessons: section.lessons.map(lesson => ({
-            ...lesson,
-            videoUrl: lesson.videoSource === "GOOGLE_DRIVE" 
-              ? convertGoogleDriveUrl(lesson.videoUrl)
-              : lesson.videoUrl,
-            duration: parseDuration(lesson.duration),
-          })),
-        })),
+      // Create slug from title
+      const slug = data.title.toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim();
+
+      // Process the form data
+      const courseData = {
+        title: data.title,
+        slug: slug,
+        description: data.description,
+        price: data.isFree ? 0 : (data.price || 0),
+        category_id: data.category,
+        thumbnail_url: data.thumbnailUrl || null,
+        status: 'DRAFT' as const,
+        instructor_id: 'admin-placeholder', // Will be updated with proper auth
+        total_lessons: data.sections.reduce((total, section) => total + section.lessons.length, 0),
+        total_duration: data.sections.reduce((total, section) => 
+          total + section.lessons.reduce((sectionTotal, lesson) => 
+            sectionTotal + parseDuration(lesson.duration), 0
+          ), 0
+        )
       };
 
-      console.log("Course data:", processedData);
+      let courseId = id;
+
+      if (isEdit && id) {
+        // Update existing course
+        const { error: courseError } = await supabase
+          .from('courses')
+          .update(courseData)
+          .eq('id', id);
+
+        if (courseError) throw courseError;
+
+        // Delete existing lessons for this course
+        await supabase
+          .from('lessons')
+          .delete()
+          .eq('course_id', id);
+      } else {
+        // Create new course
+        const { data: newCourse, error: courseError } = await supabase
+          .from('courses')
+          .insert(courseData)
+          .select()
+          .single();
+
+        if (courseError) throw courseError;
+        courseId = newCourse.id;
+      }
+
+      // Insert lessons
+      const lessonsToInsert = data.sections.flatMap((section, sectionIndex) =>
+        section.lessons.map((lesson, lessonIndex) => ({
+          course_id: courseId,
+          title: lesson.title,
+          video_url: lesson.videoSource === "DRIVE" 
+            ? convertGoogleDriveUrl(lesson.videoUrl)
+            : lesson.videoUrl,
+          video_source: lesson.videoSource,
+          duration: parseDuration(lesson.duration),
+          description: lesson.description || null,
+          position: sectionIndex * 1000 + lessonIndex,
+          is_preview: lessonIndex === 0 // First lesson is preview
+        }))
+      );
+
+      if (lessonsToInsert.length > 0) {
+        const { error: lessonsError } = await supabase
+          .from('lessons')
+          .insert(lessonsToInsert);
+
+        if (lessonsError) throw lessonsError;
+      }
+
       toast.success(isEdit ? "Course updated successfully!" : "Course created successfully!");
       navigate("/admin/courses");
     } catch (error) {
