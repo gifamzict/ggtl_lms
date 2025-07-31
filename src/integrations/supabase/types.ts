@@ -331,7 +331,7 @@ export type Database = {
     }
     Enums: {
       course_status: "DRAFT" | "PUBLISHED" | "ARCHIVED"
-      user_role: "STUDENT" | "INSTRUCTOR" | "ADMIN"
+      user_role: "STUDENT" | "INSTRUCTOR" | "ADMIN" | "SUPER_ADMIN"
       video_source: "UPLOAD" | "DRIVE" | "YOUTUBE" | "VIMEO"
     }
     CompositeTypes: {
@@ -461,7 +461,7 @@ export const Constants = {
   public: {
     Enums: {
       course_status: ["DRAFT", "PUBLISHED", "ARCHIVED"],
-      user_role: ["STUDENT", "INSTRUCTOR", "ADMIN"],
+      user_role: ["STUDENT", "INSTRUCTOR", "ADMIN", "SUPER_ADMIN"],
       video_source: ["UPLOAD", "DRIVE", "YOUTUBE", "VIMEO"],
     },
   },
