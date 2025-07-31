@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,7 @@ interface Course {
   status: string;
   instructor_id: string;
   category_id: string;
+  slug: string;
   categories?: {
     name: string;
   };
@@ -190,7 +191,8 @@ export default function Courses() {
                   transition={{ duration: 0.6, delay: 0.1 * index }}
                   className="group cursor-pointer"
                 >
-                  <Card className="overflow-hidden border-0 bg-background shadow-lg hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1">
+                  <Link to={`/courses/${course.slug}`}>
+                    <Card className="overflow-hidden border-0 bg-background shadow-lg hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1">
                     <div className="relative">
                       <img 
                         src={course.thumbnail_url || "/lovable-uploads/bd0b0eb0-6cfd-4fc4-81b8-d4b8002811c9.png"} 
@@ -254,6 +256,7 @@ export default function Courses() {
                       </div>
                     </CardContent>
                   </Card>
+                  </Link>
                 </motion.div>
               ))}
             </div>
