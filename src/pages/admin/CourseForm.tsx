@@ -287,15 +287,6 @@ export default function CourseForm() {
 
   const onSubmit = async (data: CourseFormData) => {
     try {
-      // Check if user is authenticated and has admin privileges
-      if (!user) {
-        toast.error('You must be logged in to create a course');
-        return;
-      }
-
-      // Verify admin permissions
-      await requireAdminAuth();
-
       console.log('Form data being submitted:', data);
 
       // Create slug from title
