@@ -4,8 +4,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { authService } from '@/services/authService';
-import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { SocialLoginButtons } from './SocialLoginButtons';
 
 interface LoginFormProps {
@@ -17,33 +16,19 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const { error } = await authService.signIn(email, password);
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Sign in failed",
-          description: error.message
-        });
-      } else {
-        toast({
-          title: "Welcome back!",
-          description: "You have successfully signed in."
-        });
+      const { error } = await signIn(email, password, ['STUDENT']);
+      if (!error) {
         onSuccess();
       }
     } catch (error) {
       console.error('Sign in error:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "An unexpected error occurred."
-      });
     } finally {
       setLoading(false);
     }

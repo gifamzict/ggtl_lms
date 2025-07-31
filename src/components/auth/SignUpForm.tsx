@@ -4,8 +4,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { authService } from '@/services/authService';
-import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { SocialLoginButtons } from './SocialLoginButtons';
 
 interface SignUpFormProps {
@@ -18,33 +17,19 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { signUp } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const { error } = await authService.signUp(email, password, fullName);
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Sign up failed",
-          description: error.message
-        });
-      } else {
-        toast({
-          title: "Check your email",
-          description: "We've sent you a confirmation link to complete your registration."
-        });
+      const { error } = await signUp(email, password, fullName, 'STUDENT');
+      if (!error) {
         onSuccess();
       }
     } catch (error) {
       console.error('Sign up error:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "An unexpected error occurred."
-      });
     } finally {
       setLoading(false);
     }

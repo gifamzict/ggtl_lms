@@ -38,23 +38,20 @@ const menuItems = [
     icon: LayoutDashboard,
   },
   {
-    title: "Instructor Requests", 
-    url: "/admin/instructor-requests",
+    title: "User Management",
     icon: UserCheck,
+    items: [
+      { title: "Manage Admins", url: "/admin/manage-admins" },
+      { title: "Students", url: "/admin/students" },
+    ],
   },
-    {
-      title: "Course Management",
-      icon: BookOpen,
-      items: [
-        { title: "Courses", url: "/admin/courses" },
-        { title: "Course Categories", url: "/admin/course-categories" },
-        { title: "Course Reviews", url: "/admin/course-reviews" },
-      ],
-    },
   {
-    title: "Certificate Builder",
-    url: "/admin/certificate-builder",
-    icon: Award,
+    title: "Course Management",
+    icon: BookOpen,
+    items: [
+      { title: "Courses", url: "/admin/courses" },
+      { title: "Course Categories", url: "/admin/course-categories" },
+    ],
   },
   {
     title: "Orders",
@@ -62,56 +59,13 @@ const menuItems = [
     icon: ShoppingCart,
   },
   {
-    title: "Payout Requests",
-    url: "/admin/payout-requests", 
-    icon: CreditCard,
-  },
-  {
-    title: "Content Management",
-    icon: FileText,
-    items: [
-      { title: "Blog Categories", url: "/admin/blog-categories" },
-      { title: "Blogs", url: "/admin/blogs" },
-    ],
-  },
-  {
-    title: "Payout Gateways",
-    url: "/admin/payout-gateways",
-    icon: CreditCard,
-  },
-  {
-    title: "Sections",
-    icon: MessageSquare,
-    items: [
-      { title: "Contact Cards", url: "/admin/contact-cards" },
-      { title: "Contact Setting", url: "/admin/contact-setting" },
-    ],
-  },
-  {
-    title: "Contact",
-    icon: Phone,
-    items: [
-      { title: "Header / Footer", url: "/admin/header-footer" },
-      { title: "Top Bar", url: "/admin/top-bar" },
-      { title: "Footer Content", url: "/admin/footer-content" },
-      { title: "Footer Column One", url: "/admin/footer-column-one" },
-      { title: "Footer Column Two", url: "/admin/footer-column-two" },
-      { title: "Social Links", url: "/admin/social-links" },
-    ],
-  },
-  {
-    title: "Custom Pages",
-    url: "/admin/custom-pages",
-    icon: FileText,
-  },
-  {
     title: "Payment Settings",
     url: "/admin/payment-settings",
     icon: Settings,
   },
   {
-    title: "Settings",
-    url: "/admin/settings",
+    title: "Profile",
+    url: "/admin/profile",
     icon: Settings,
   },
 ];
