@@ -29,6 +29,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { Plus, Trash2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthStore } from "@/store/authStore";
 
 const lessonSchema = z.object({
   title: z.string().min(1, "Lesson title is required"),
@@ -134,6 +135,7 @@ export default function CourseForm() {
   const { id } = useParams();
   const isEdit = Boolean(id);
   const [categories, setCategories] = useState<any[]>([]);
+  const { user } = useAuthStore();
 
   const form = useForm<CourseFormData>({
     resolver: zodResolver(courseSchema),
@@ -284,6 +286,14 @@ export default function CourseForm() {
 
   const onSubmit = async (data: CourseFormData) => {
     try {
+      // Check if user is authenticated
+      if (!user) {
+        toast.error('You must be logged in to create a course');
+        return;
+      }
+
+      console.log('Form data being submitted:', data);
+
       // Create slug from title
       const slug = data.title.toLowerCase()
         .replace(/[^a-z0-9\s-]/g, '')
@@ -300,7 +310,7 @@ export default function CourseForm() {
         category_id: data.category,
         thumbnail_url: data.thumbnailUrl || null,
         status: 'DRAFT' as const,
-        instructor_id: 'admin-placeholder', // Will be updated with proper auth
+        instructor_id: user.id, // Use actual authenticated user ID
         total_lessons: data.sections.reduce((total, section) => total + section.lessons.length, 0),
         total_duration: data.sections.reduce((total, section) => 
           total + section.lessons.reduce((sectionTotal, lesson) => 
@@ -308,6 +318,8 @@ export default function CourseForm() {
           ), 0
         )
       };
+
+      console.log('Course data being sent to database:', courseData);
 
       let courseId = id;
 
@@ -333,7 +345,11 @@ export default function CourseForm() {
           .select()
           .single();
 
-        if (courseError) throw courseError;
+        if (courseError) {
+          console.error('Course creation error:', courseError);
+          toast.error(`Failed to create course: ${courseError.message}`);
+          throw courseError;
+        }
         courseId = newCourse.id;
       }
 
@@ -358,14 +374,22 @@ export default function CourseForm() {
           .from('lessons')
           .insert(lessonsToInsert);
 
-        if (lessonsError) throw lessonsError;
+        if (lessonsError) {
+          console.error('Lessons creation error:', lessonsError);
+          toast.error(`Failed to create lessons: ${lessonsError.message}`);
+          throw lessonsError;
+        }
       }
 
       toast.success(isEdit ? "Course updated successfully!" : "Course created successfully!");
       navigate("/admin/courses");
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving course:', error);
-      toast.error('Failed to save course');
+      if (error?.message) {
+        toast.error(`Failed to save course: ${error.message}`);
+      } else {
+        toast.error('Failed to save course. Please check all required fields.');
+      }
     }
   };
 
