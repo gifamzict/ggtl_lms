@@ -4,12 +4,15 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from '@/hooks/useAuth';
+import { AdminAuthGuard } from '@/components/auth/AdminAuthGuard';
 import { PublicNavbar } from '@/components/layout/PublicNavbar';
 import { useLocation } from 'react-router-dom';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { ThemeProvider } from './components/ThemeProvider';
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import AboutUs from "./pages/AboutUs";
+import ContactUs from "./pages/ContactUs";
 import AdminDashboard from "./pages/AdminDashboard";
 import CoursesManagement from "./pages/admin/CoursesManagement";
 import CourseForm from "./pages/admin/CourseForm";
@@ -35,16 +38,30 @@ const AppContent = () => {
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<Auth />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/signup" element={<AdminSignup />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-                  <Route path="/admin/courses" element={<CoursesManagement />} />
-                  <Route path="/admin/courses/new" element={<CourseForm />} />
-                  <Route path="/admin/courses/edit/:id" element={<CourseForm />} />
-                  <Route path="/admin/course-categories" element={<CourseCategories />} />
-                  <Route path="/admin/manage-admins" element={<ManageAdmins />} />
-                  <Route path="/admin/students" element={<Students />} />
-                  <Route path="/admin/profile" element={<AdminProfile />} />
+                  <Route path="/about-us" element={<AboutUs />} />
+                  <Route path="/contact-us" element={<ContactUs />} />
+                  
+                  {/* Public Admin Login/Signup (not protected) */}
+                  <Route path="/admin/login" element={<AdminLogin />} />
+                  <Route path="/admin/signup" element={<AdminSignup />} />
+                  
+                  {/* Protected Admin Routes */}
+                  <Route path="/admin/*" element={
+                    <AdminAuthGuard>
+                      <Routes>
+                        <Route path="/" element={<AdminDashboard />} />
+                        <Route path="dashboard" element={<AdminDashboard />} />
+                        <Route path="courses" element={<CoursesManagement />} />
+                        <Route path="courses/new" element={<CourseForm />} />
+                        <Route path="courses/edit/:id" element={<CourseForm />} />
+                        <Route path="course-categories" element={<CourseCategories />} />
+                        <Route path="manage-admins" element={<ManageAdmins />} />
+                        <Route path="students" element={<Students />} />
+                        <Route path="profile" element={<AdminProfile />} />
+                      </Routes>
+                    </AdminAuthGuard>
+                  } />
+                  
                   <Route path="/student/dashboard" element={<StudentDashboard />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />

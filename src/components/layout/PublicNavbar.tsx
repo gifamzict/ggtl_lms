@@ -90,28 +90,21 @@ export function PublicNavbar() {
             </SheetHeader>
             <div className="grid gap-4 py-4">
               <Link 
-                to="/courses" 
+                to="/" 
                 className="text-sm font-medium hover:text-primary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
-                Courses
+                Home
               </Link>
               <Link 
-                to="/categories" 
+                to="/about-us" 
                 className="text-sm font-medium hover:text-primary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
-                Categories
+                About Us
               </Link>
               <Link 
-                to="/about" 
-                className="text-sm font-medium hover:text-primary transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                About
-              </Link>
-              <Link 
-                to="/contact" 
+                to="/contact-us" 
                 className="text-sm font-medium hover:text-primary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -177,10 +170,10 @@ export function PublicNavbar() {
           {/* Main Nav Links */}
           <nav className="flex items-center space-x-6">
             <Link 
-              to="/courses"
+              to="/"
               className="text-sm font-medium hover:text-primary transition-colors"
             >
-              Courses
+              Home
             </Link>
             
             {/* Categories Dropdown */}
@@ -203,10 +196,10 @@ export function PublicNavbar() {
             </DropdownMenu>
 
             <Link 
-              to="/about"
+              to="/about-us"
               className="text-sm font-medium hover:text-primary transition-colors"
             >
-              About
+              About Us
             </Link>
             
             <Link 
@@ -217,7 +210,7 @@ export function PublicNavbar() {
             </Link>
             
             <Link 
-              to="/contact"
+              to="/contact-us"
               className="text-sm font-medium hover:text-primary transition-colors"
             >
               Contact Us
