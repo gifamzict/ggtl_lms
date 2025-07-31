@@ -65,7 +65,7 @@ export function StudentSidebar() {
               {navigationItems.map(item => <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClassName}>
-                      <item.icon className="mr-2 h-4 w-4" />
+                      <item.icon className="mr-2 h-4 w-4 bg-zinc-600" />
                       {state !== "collapsed" && <span className="text-slate-50">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
