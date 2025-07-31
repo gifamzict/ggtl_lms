@@ -382,7 +382,11 @@ export default function CourseForm() {
       }
 
       toast.success(isEdit ? "Course updated successfully!" : "Course created successfully!");
-      navigate("/admin/courses");
+      
+      // Add a small delay to ensure the user sees the success message
+      setTimeout(() => {
+        navigate("/admin/courses");
+      }, 1000);
     } catch (error: any) {
       console.error('Error saving course:', error);
       if (error?.message) {
