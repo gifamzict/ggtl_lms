@@ -14,6 +14,7 @@ import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
 import CoursesManagement from "./pages/admin/CoursesManagement";
 import CourseForm from "./pages/admin/CourseForm";
+import CourseCategories from "./pages/admin/CourseCategories";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -58,10 +59,11 @@ const App = () => (
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<Auth />} />
-                  <Route path="/admin" element={<AdminDashboard />} />
-                  <Route path="/admin/courses" element={<CoursesManagement />} />
-                  <Route path="/admin/courses/new" element={<CourseForm />} />
-                  <Route path="/admin/courses/edit/:id" element={<CourseForm />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/courses" element={<CoursesManagement />} />
+        <Route path="/admin/courses/new" element={<CourseForm />} />
+        <Route path="/admin/courses/edit/:id" element={<CourseForm />} />
+        <Route path="/admin/course-categories" element={<CourseCategories />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

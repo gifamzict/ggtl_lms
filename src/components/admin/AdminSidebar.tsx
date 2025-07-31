@@ -42,17 +42,15 @@ const menuItems = [
     url: "/admin/instructor-requests",
     icon: UserCheck,
   },
-  {
-    title: "Course Management",
-    icon: BookOpen,
-    items: [
-      { title: "Courses", url: "/admin/courses" },
-      { title: "Course Categories", url: "/admin/course-categories" },
-      { title: "Course Languages", url: "/admin/course-languages" },
-      { title: "Course Levels", url: "/admin/course-levels" },
-      { title: "Course Reviews", url: "/admin/course-reviews" },
-    ],
-  },
+    {
+      title: "Course Management",
+      icon: BookOpen,
+      items: [
+        { title: "Courses", url: "/admin/courses" },
+        { title: "Course Categories", url: "/admin/course-categories" },
+        { title: "Course Reviews", url: "/admin/course-reviews" },
+      ],
+    },
   {
     title: "Certificate Builder",
     url: "/admin/certificate-builder",
