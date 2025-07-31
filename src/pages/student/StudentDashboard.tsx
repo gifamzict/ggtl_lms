@@ -138,12 +138,6 @@ export default function StudentDashboard() {
         <div className="flex-1">
           {/* Hero Header Section */}
           <div className="relative h-64 bg-gradient-to-r from-blue-900 via-purple-900 to-blue-800 overflow-hidden">
-            <div 
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
-              style={{
-                backgroundImage: "url('/lovable-uploads/27aef8b2-ed34-43c6-bdf6-a1eed430115b.png')"
-              }}
-            />
             <div className="relative z-10 flex items-center justify-between p-8 h-full">
               <div className="flex items-center space-x-4">
                 <SidebarTrigger className="md:hidden text-white hover:bg-white/10" />
@@ -200,9 +194,6 @@ export default function StudentDashboard() {
                 </div>
               </div>
               
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6">
-                Become a Instructor
-              </Button>
             </div>
 
             {/* Stats Cards */}

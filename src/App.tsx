@@ -24,6 +24,7 @@ import ManageAdmins from "./pages/admin/ManageAdmins";
 import Students from "./pages/admin/Students";
 import AdminProfile from "./pages/admin/AdminProfile";
 import StudentDashboard from "./pages/student/StudentDashboard";
+import StudentCourses from "./pages/student/StudentCourses";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -64,6 +65,7 @@ const AppContent = () => {
                   } />
                   
                   <Route path="/student/dashboard" element={<StudentDashboard />} />
+                  <Route path="/student/courses" element={<StudentCourses />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
