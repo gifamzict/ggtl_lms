@@ -4,82 +4,64 @@ import { Search, Menu, ChevronDown, ShoppingCart, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/authStore';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
 interface Category {
   id: string;
   name: string;
   slug: string;
 }
-
 export function PublicNavbar() {
-  const { user, signOut } = useAuth();
-  const { openAuthModal } = useAuthStore();
+  const {
+    user,
+    signOut
+  } = useAuth();
+  const {
+    openAuthModal
+  } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
-
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const { data, error } = await supabase
-          .from('categories')
-          .select('*')
-          .order('name');
-        
+        const {
+          data,
+          error
+        } = await supabase.from('categories').select('*').order('name');
         if (error) {
           console.error('Error fetching categories:', error);
           return;
         }
-        
         setCategories(data || []);
       } catch (error) {
         console.error('Error fetching categories:', error);
       }
     };
-
     fetchCategories();
   }, []);
-
   const handleSignOut = async () => {
     await signOut();
   };
-
   const getUserDisplayName = () => {
     if (!user) return '';
     return user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
   };
-
   const getUserInitials = () => {
     const name = getUserDisplayName();
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
-
-  return (
-    <motion.header 
-      className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
+  return <motion.header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" initial={{
+    y: -100
+  }} animate={{
+    y: 0
+  }} transition={{
+    duration: 0.3
+  }}>
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Mobile Menu Button */}
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -97,78 +79,50 @@ export function PublicNavbar() {
               </SheetDescription>
             </SheetHeader>
             <div className="grid gap-4 py-4">
-              <Link 
-                to="/" 
-                className="text-sm font-medium hover:text-primary transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
+              <Link to="/" className="text-sm font-medium hover:text-primary transition-colors" onClick={() => setIsOpen(false)}>
                 Home
               </Link>
-              <Link 
-                to="/about-us" 
-                className="text-sm font-medium hover:text-primary transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
+              <Link to="/about-us" className="text-sm font-medium hover:text-primary transition-colors" onClick={() => setIsOpen(false)}>
                 About Us
               </Link>
-              <Link 
-                to="/contact-us" 
-                className="text-sm font-medium hover:text-primary transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
+              <Link to="/contact-us" className="text-sm font-medium hover:text-primary transition-colors" onClick={() => setIsOpen(false)}>
                 Contact Us
               </Link>
-              {user ? (
-                <>
-                  <Link 
-                    to="/student/dashboard" 
-                    className="text-sm font-medium hover:text-primary transition-colors"
-                    onClick={() => setIsOpen(false)}
-                  >
+              {user ? <>
+                  <Link to="/student/dashboard" className="text-sm font-medium hover:text-primary transition-colors" onClick={() => setIsOpen(false)}>
                     Dashboard
                   </Link>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      handleSignOut();
-                      setIsOpen(false);
-                    }}
-                  >
+                  <Button variant="outline" onClick={() => {
+                handleSignOut();
+                setIsOpen(false);
+              }}>
                     Sign Out
                   </Button>
-                </>
-              ) : (
-                <>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      openAuthModal();
-                      setIsOpen(false);
-                    }}
-                  >
+                </> : <>
+                  <Button variant="outline" onClick={() => {
+                openAuthModal();
+                setIsOpen(false);
+              }}>
                     Log In
                   </Button>
-                  <Button 
-                    onClick={() => {
-                      openAuthModal();
-                      setIsOpen(false);
-                    }}
-                  >
+                  <Button onClick={() => {
+                openAuthModal();
+                setIsOpen(false);
+              }}>
                     Sign Up
                   </Button>
-                </>
-              )}
+                </>}
             </div>
           </SheetContent>
         </Sheet>
 
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="text-2xl font-bold text-primary"
-          >
+          <motion.div whileHover={{
+          scale: 1.05
+        }} whileTap={{
+          scale: 0.95
+        }} className="text-2xl font-bold text-primary">
             GIFAMZ
           </motion.div>
         </Link>
@@ -177,10 +131,7 @@ export function PublicNavbar() {
         <div className="hidden md:flex items-center space-x-6 flex-1 max-w-4xl mx-8">
           {/* Main Nav Links */}
           <nav className="flex items-center space-x-6">
-            <Link 
-              to="/"
-              className="text-sm font-medium hover:text-primary transition-colors"
-            >
+            <Link to="/" className="text-sm font-medium hover:text-primary transition-colors">
               Home
             </Link>
             
@@ -193,43 +144,23 @@ export function PublicNavbar() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-56 bg-background border shadow-lg z-50">
-                {categories.length > 0 ? (
-                  categories.map((category) => (
-                    <DropdownMenuItem key={category.id} asChild>
-                      <Link 
-                        to={`/courses?category=${category.id}`}
-                        className="flex items-center px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
-                      >
+                {categories.length > 0 ? categories.map(category => <DropdownMenuItem key={category.id} asChild>
+                      <Link to={`/courses?category=${category.id}`} className="flex items-center px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors">
                         {category.name}
                       </Link>
-                    </DropdownMenuItem>
-                  ))
-                ) : (
-                  <DropdownMenuItem disabled>
+                    </DropdownMenuItem>) : <DropdownMenuItem disabled>
                     <span className="text-muted-foreground">Loading categories...</span>
-                  </DropdownMenuItem>
-                )}
+                  </DropdownMenuItem>}
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Link 
-              to="/about-us"
-              className="text-sm font-medium hover:text-primary transition-colors"
-            >
+            <Link to="/about-us" className="text-sm font-medium hover:text-primary transition-colors">
               About Us
             </Link>
             
-            <Link 
-              to="/blogs"
-              className="text-sm font-medium hover:text-primary transition-colors"
-            >
-              Blogs
-            </Link>
             
-            <Link 
-              to="/contact-us"
-              className="text-sm font-medium hover:text-primary transition-colors"
-            >
+            
+            <Link to="/contact-us" className="text-sm font-medium hover:text-primary transition-colors">
               Contact Us
             </Link>
           </nav>
@@ -237,17 +168,13 @@ export function PublicNavbar() {
           {/* Search Bar */}
           <div className="flex-1 max-w-md relative ml-6">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Search for anything"
-              className="pl-10 w-full"
-            />
+            <Input placeholder="Search for anything" className="pl-10 w-full" />
           </div>
         </div>
 
         {/* Right Side Actions */}
         <div className="hidden md:flex items-center space-x-4">
-          {user ? (
-            <>
+          {user ? <>
               {/* Cart Icon */}
               <Button variant="ghost" size="icon" className="relative">
                 <ShoppingCart className="h-5 w-5" />
@@ -290,26 +217,15 @@ export function PublicNavbar() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </>
-          ) : (
-            <>
-              <Button 
-                variant="outline" 
-                onClick={openAuthModal}
-                className="hover:scale-105 transition-transform"
-              >
+            </> : <>
+              <Button variant="outline" onClick={openAuthModal} className="hover:scale-105 transition-transform">
                 Log In
               </Button>
-              <Button 
-                onClick={openAuthModal}
-                className="hover:scale-105 transition-transform bg-primary text-primary-foreground hover:bg-primary/90"
-              >
+              <Button onClick={openAuthModal} className="hover:scale-105 transition-transform bg-primary text-primary-foreground hover:bg-primary/90">
                 Sign Up
               </Button>
-            </>
-          )}
+            </>}
         </div>
       </div>
-    </motion.header>
-  );
+    </motion.header>;
 }
