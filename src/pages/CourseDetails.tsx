@@ -30,7 +30,6 @@ interface Course {
   title: string;
   description: string;
   thumbnail_url: string;
-  demo_video_url?: string;
   total_lessons: number;
   total_duration: number;
   price: number;
@@ -52,6 +51,8 @@ interface Lesson {
   duration: number;
   is_preview: boolean;
   position: number;
+  video_url: string;
+  video_source: string;
 }
 
 interface CourseSection {
@@ -71,6 +72,7 @@ const CourseDetails = () => {
   const [enrolling, setEnrolling] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [previewLesson, setPreviewLesson] = useState<Lesson | null>(null);
 
   useEffect(() => {
     if (slug) {
@@ -95,6 +97,10 @@ const CourseDetails = () => {
         .single();
 
       if (courseError) throw courseError;
+      
+      // Debug: Log the complete course data to see what fields are available
+      console.log('Course data fetched:', courseData);
+      
       setCourse(courseData);
 
       // Check if user is enrolled (only if user is logged in)
@@ -117,6 +123,15 @@ const CourseDetails = () => {
         .order('position');
 
       if (lessonsError) throw lessonsError;
+
+      console.log('Lessons data fetched:', lessonsData);
+
+      // Find the first preview lesson to use as demo video
+      const previewLessonData = lessonsData?.find(lesson => lesson.is_preview);
+      if (previewLessonData) {
+        console.log('Preview lesson found:', previewLessonData);
+        setPreviewLesson(previewLessonData);
+      }
 
       // Group lessons by sections (for now, we'll create a single section)
       const defaultSection: CourseSection = {
@@ -293,13 +308,13 @@ const CourseDetails = () => {
             <Card>
               <CardContent className="p-0">
                 <div className="aspect-video bg-black relative">
-                  {course.demo_video_url ? (
-                    course.demo_video_url.includes('drive.google.com') ? (
+                  {previewLesson?.video_url ? (
+                    previewLesson.video_url.includes('drive.google.com') ? (
                       <div className="video-container relative w-full h-full overflow-hidden rounded-lg">
                         <iframe
-                          src={course.demo_video_url.includes('/preview') ? 
-                            course.demo_video_url : 
-                            course.demo_video_url.replace('/view', '/preview')
+                          src={previewLesson.video_url.includes('/preview') ? 
+                            previewLesson.video_url : 
+                            previewLesson.video_url.replace('/view', '/preview')
                           }
                           width="100%"
                           height="calc(100% + 100px)"
@@ -312,7 +327,7 @@ const CourseDetails = () => {
                       </div>
                     ) : (
                       <ReactPlayer
-                        url={course.demo_video_url}
+                        url={previewLesson.video_url}
                         width="100%"
                         height="100%"
                         controls
