@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from '@/hooks/useAuth';
 import { AdminAuthGuard } from '@/components/auth/AdminAuthGuard';
 import { PublicNavbar } from '@/components/layout/PublicNavbar';
+import Footer from '@/components/layout/Footer';
 import { useLocation } from 'react-router-dom';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { ThemeProvider } from './components/ThemeProvider';
@@ -67,6 +68,7 @@ const AppContent = () => {
                   <Route path="*" element={<NotFound />} />
                 </Routes>
         </main>
+        {!isAdminRoute && <Footer />}
         <AuthModal />
       </div>
     );

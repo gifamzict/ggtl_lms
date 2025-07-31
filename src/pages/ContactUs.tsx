@@ -3,8 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import { MapPin, Phone, Mail, Users } from "lucide-react";
 import { toast } from "sonner";
 
 interface ContactFormData {
@@ -73,16 +72,12 @@ export default function ContactUs() {
     setIsSubmitting(true);
     
     try {
-      // For now, we'll simulate the API call
-      // TODO: Replace with actual API endpoint
       console.log("Contact form submission:", formData);
       
-      // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       toast.success("Message sent successfully! We'll get back to you soon.");
       
-      // Reset form
       setFormData({
         fullName: "",
         email: "",
@@ -100,234 +95,192 @@ export default function ContactUs() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary/10 via-background to-secondary/10 py-20">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
-            Contact Us
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Have questions about our courses? Need guidance on your tech journey? 
-            We're here to help. Get in touch with our team.
-          </p>
+      {/* Hero Section with Background */}
+      <section className="relative bg-gradient-to-r from-primary/90 to-primary py-24 text-white overflow-hidden">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-20"></div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6">Contact Us</h1>
+            <div className="flex items-center justify-center space-x-2 text-white/90">
+              <span>HOME</span>
+              <span>•</span>
+              <span>CONTACT US</span>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Contact Content */}
-      <section className="py-20">
+      {/* Contact Information Cards */}
+      <section className="py-16 -mt-8 relative z-10">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Contact Information */}
-            <div className="space-y-8">
-              <div>
-                <h2 className="text-3xl font-bold text-foreground mb-6">Get in Touch</h2>
-                <p className="text-muted-foreground text-lg leading-relaxed">
-                  Ready to transform your career with technology? Our team is here to guide you 
-                  through your learning journey and answer any questions you may have about our 
-                  courses, programs, or career opportunities.
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="text-center shadow-lg border-0 bg-white">
+              <CardHeader className="pb-4">
+                <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MapPin className="h-8 w-8 text-yellow-600" />
+                </div>
+                <CardTitle className="text-gray-800">Office Address</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  7 Yaya Abatan Rd, Aguda Lagos.
                 </p>
-              </div>
+              </CardContent>
+            </Card>
 
-              <div className="space-y-6">
-                <Card className="bg-card border-border">
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <MapPin className="h-6 w-6 text-primary mt-1" />
-                      <div>
-                        <h3 className="font-semibold text-foreground mb-2">Office Address</h3>
-                        <p className="text-muted-foreground">
-                          123 Technology Drive<br />
-                          Victoria Island, Lagos<br />
-                          Nigeria
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+            <Card className="text-center shadow-lg border-0 bg-white">
+              <CardHeader className="pb-4">
+                <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Phone className="h-8 w-8 text-pink-600" />
+                </div>
+                <CardTitle className="text-gray-800">Email Us</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  info@ggtl.tech<br />
+                  support@ggtl.tech
+                </p>
+              </CardContent>
+            </Card>
 
-                <Card className="bg-card border-border">
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <Phone className="h-6 w-6 text-primary mt-1" />
-                      <div>
-                        <h3 className="font-semibold text-foreground mb-2">Phone Number</h3>
-                        <p className="text-muted-foreground">
-                          +234 (0) 901 234 5678
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+            <Card className="text-center shadow-lg border-0 bg-white">
+              <CardHeader className="pb-4">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Mail className="h-8 w-8 text-blue-600" />
+                </div>
+                <CardTitle className="text-gray-800">Let's Discuss</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Phone: +234 707 507 4103<br />
+                  Phone: +234 813 3554 5833
+                </p>
+              </CardContent>
+            </Card>
 
-                <Card className="bg-card border-border">
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <Mail className="h-6 w-6 text-primary mt-1" />
-                      <div>
-                        <h3 className="font-semibold text-foreground mb-2">Email Address</h3>
-                        <p className="text-muted-foreground">
-                          contact@ggtl.tech
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+            <Card className="text-center shadow-lg border-0 bg-white">
+              <CardHeader className="pb-4">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="h-8 w-8 text-purple-600" />
+                </div>
+                <CardTitle className="text-gray-800">Team Up with Us</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Lagos Nigeria<br />
+                  Lagos Nigeria
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
 
-                <Card className="bg-card border-border">
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <Clock className="h-6 w-6 text-primary mt-1" />
-                      <div>
-                        <h3 className="font-semibold text-foreground mb-2">Business Hours</h3>
-                        <p className="text-muted-foreground">
-                          Monday - Friday: 9:00 AM - 6:00 PM<br />
-                          Saturday: 10:00 AM - 4:00 PM<br />
-                          Sunday: Closed
-                        </p>
-                      </div>
+      {/* Contact Form and Map Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            {/* Professional Image */}
+            <div className="lg:order-1">
+              <div className="bg-white rounded-lg shadow-lg p-8 h-full">
+                <div className="w-full h-96 bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg flex items-center justify-center mb-6">
+                  <div className="text-center">
+                    <div className="w-32 h-32 bg-white rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
+                      <Users className="h-16 w-16 text-primary" />
                     </div>
-                  </CardContent>
-                </Card>
+                    <h3 className="text-xl font-semibold text-gray-800 mb-2">Professional Support</h3>
+                    <p className="text-gray-600">Ready to help you succeed</p>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Contact Form */}
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold text-foreground">
-                  Send us a Message
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+            <div className="lg:order-2">
+              <div className="bg-white rounded-lg shadow-lg p-8">
+                <h2 className="text-3xl font-bold text-gray-800 mb-2">Send Us Message</h2>
+                <p className="text-gray-600 mb-6">
+                  Your email address will not be published. Required fields are marked *
+                </p>
+                
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="fullName">Full Name *</Label>
                       <Input
-                        id="fullName"
                         name="fullName"
                         type="text"
                         value={formData.fullName}
                         onChange={handleInputChange}
-                        placeholder="Enter your full name"
+                        placeholder="Name*"
+                        className="bg-gray-50 border-gray-200"
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email Address *</Label>
                       <Input
-                        id="email"
                         name="email"
                         type="email"
                         value={formData.email}
                         onChange={handleInputChange}
-                        placeholder="Enter your email"
+                        placeholder="Email*"
+                        className="bg-gray-50 border-gray-200"
                         required
                       />
                     </div>
                   </div>
-
+                  
                   <div className="space-y-2">
-                    <Label htmlFor="subject">Subject *</Label>
                     <Input
-                      id="subject"
                       name="subject"
                       type="text"
                       value={formData.subject}
                       onChange={handleInputChange}
-                      placeholder="What is this regarding?"
+                      placeholder="Subject*"
+                      className="bg-gray-50 border-gray-200"
                       required
                     />
                   </div>
-
+                  
                   <div className="space-y-2">
-                    <Label htmlFor="message">Message *</Label>
                     <Textarea
-                      id="message"
                       name="message"
                       value={formData.message}
                       onChange={handleInputChange}
-                      placeholder="Tell us more about your inquiry..."
-                      rows={5}
+                      placeholder="Your Message*"
+                      rows={6}
+                      className="bg-gray-50 border-gray-200"
                       required
                     />
                   </div>
-
+                  
                   <Button 
                     type="submit" 
-                    className="w-full" 
-                    size="lg"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-md font-medium"
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? "Sending..." : "Send Message"}
+                    {isSubmitting ? 'Sending...' : 'Submit Now'}
                   </Button>
                 </form>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="py-20 bg-secondary/5">
+      {/* Google Map Section */}
+      <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
-              Frequently Asked Questions
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Quick answers to common questions about our programs and services.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <Card className="bg-card border-border">
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-foreground mb-3">
-                  How long are the courses?
-                </h3>
-                <p className="text-muted-foreground">
-                  Our courses range from 8-16 weeks depending on the program. 
-                  All courses are designed to be completed while working full-time.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card border-border">
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-foreground mb-3">
-                  Do you offer job placement assistance?
-                </h3>
-                <p className="text-muted-foreground">
-                  Yes! We provide career support including resume building, 
-                  interview preparation, and connections to our employer network.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card border-border">
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-foreground mb-3">
-                  Are there payment plans available?
-                </h3>
-                <p className="text-muted-foreground">
-                  We offer flexible payment options including installment plans 
-                  to make our courses accessible to everyone.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card border-border">
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-foreground mb-3">
-                  Can I study part-time?
-                </h3>
-                <p className="text-muted-foreground">
-                  Absolutely! Our courses are designed for working professionals 
-                  with flexible schedules and self-paced learning options.
-                </p>
-              </CardContent>
-            </Card>
+          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.4147072877!2d3.3516334!3d6.5448185!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b8d58e2f2a827%3A0x24e30869c5ae8c79!2sYaya%20Abatan%20Rd%2C%20Ogba%2C%20Lagos%2C%20Nigeria!5e0!3m2!1sen!2sus!4v1709234567890!5m2!1sen!2sus"
+              width="100%"
+              height="400"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="GGTL Office Location"
+            />
           </div>
         </div>
       </section>
