@@ -4,43 +4,79 @@ import { useAuth } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { BookOpen, Users, Award, TrendingUp, Target, Zap, Play, Star, Clock, CheckCircle, ArrowRight, Globe, Shield, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import heroImage from '@/assets/hero-learning.jpg';
 import codingImage from '@/assets/coding-workspace.jpg';
 import studentImage from '@/assets/student-success.jpg';
+
 interface Category {
   id: string;
   name: string;
   slug: string;
 }
+
+interface Course {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  thumbnail_url: string;
+  price: number;
+  total_lessons: number;
+  total_duration: number;
+  categories: { name: string };
+  profiles: { full_name: string };
+}
 const Index = () => {
-  const {
-    user,
-    loading
-  } = useAuth();
-  const {
-    openAuthModal
-  } = useAuthStore();
+  const { user, loading } = useAuth();
+  const { openAuthModal } = useAuthStore();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [coursesLoading, setCoursesLoading] = useState(true);
+
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchData = async () => {
       try {
-        const {
-          data,
-          error
-        } = await supabase.from('categories').select('*').order('name').limit(4);
-        if (error) {
-          console.error('Error fetching categories:', error);
-          return;
+        // Fetch categories
+        const { data: categoriesData, error: categoriesError } = await supabase
+          .from('categories')
+          .select('*')
+          .order('name')
+          .limit(4);
+        
+        if (categoriesError) {
+          console.error('Error fetching categories:', categoriesError);
+        } else {
+          setCategories(categoriesData || []);
         }
-        setCategories(data || []);
+
+        // Fetch featured courses
+        const { data: coursesData, error: coursesError } = await supabase
+          .from('courses')
+          .select(`
+            *,
+            categories(name),
+            profiles(full_name)
+          `)
+          .eq('status', 'PUBLISHED')
+          .limit(6);
+        
+        if (coursesError) {
+          console.error('Error fetching courses:', coursesError);
+        } else {
+          setCourses(coursesData || []);
+        }
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error('Error fetching data:', error);
+      } finally {
+        setCoursesLoading(false);
       }
     };
-    fetchCategories();
+
+    fetchData();
   }, []);
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">
@@ -297,85 +333,105 @@ const Index = () => {
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[{
-            title: "Complete React Developer Bootcamp",
-            duration: "42h",
-            lessons: 156,
-            students: "12.5k",
-            price: "$89",
-            rating: 4.9,
-            instructor: "Alex Johnson",
-            image: codingImage,
-            level: "Beginner to Advanced"
-          }, {
-            title: "Python for Data Science & AI",
-            duration: "38h",
-            lessons: 124,
-            students: "8.2k",
-            price: "$79",
-            rating: 4.8,
-            instructor: "Dr. Maria Rodriguez",
-            image: studentImage,
-            level: "Intermediate"
-          }, {
-            title: "UX/UI Design Masterclass",
-            duration: "35h",
-            lessons: 98,
-            students: "6.7k",
-            price: "$94",
-            rating: 4.9,
-            instructor: "David Kim",
-            image: heroImage,
-            level: "All Levels"
-          }].map((course, index) => <motion.div key={index} initial={{
-            opacity: 0,
-            y: 20
-          }} animate={{
-            opacity: 1,
-            y: 0
-          }} transition={{
-            duration: 0.6,
-            delay: 0.7 + index * 0.1
-          }} className="group cursor-pointer">
-                <Card className="overflow-hidden border-0 bg-background shadow-lg hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1">
-                  <div className="relative">
-                    <img src={course.image} alt={course.title} className="w-full h-48 object-cover" />
-                    <div className="absolute top-4 left-4 bg-accent text-accent-foreground px-3 py-1 rounded-full text-sm font-medium">
-                      {course.level}
-                    </div>
-                    <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {course.duration}
-                    </div>
-                  </div>
-                  <CardContent className="p-6">
-                    <h3 className="font-bold text-lg mb-3 line-clamp-2 group-hover:text-primary transition-colors">
-                      {course.title}
-                    </h3>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                      <div className="flex items-center gap-1">
-                        <BookOpen className="h-4 w-4" />
-                        <span>{course.lessons} lessons</span>
+            {coursesLoading ? (
+              // Loading skeletons
+              Array.from({ length: 6 }).map((_, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.7 + index * 0.1 }}
+                >
+                  <Card className="overflow-hidden border-0 bg-background shadow-lg">
+                    <Skeleton className="w-full h-48" />
+                    <CardContent className="p-6">
+                      <Skeleton className="h-6 w-3/4 mb-3" />
+                      <div className="flex gap-4 mb-4">
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-4 w-20" />
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Users className="h-4 w-4" />
-                        <span>{course.students} students</span>
+                      <div className="flex items-center gap-2 mb-4">
+                        <Skeleton className="w-8 h-8 rounded-full" />
+                        <Skeleton className="h-4 w-24" />
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <img src={studentImage} alt={course.instructor} className="w-8 h-8 rounded-full object-cover" />
-                      <span className="text-sm font-medium text-foreground">{course.instructor}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span className="font-medium text-foreground">{course.rating}</span>
+                      <div className="flex items-center justify-between">
+                        <Skeleton className="h-4 w-16" />
+                        <Skeleton className="h-6 w-12" />
                       </div>
-                      <span className="text-2xl font-bold text-primary">{course.price}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>)}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))
+            ) : courses.length > 0 ? (
+              // Real course data
+              courses.map((course, index) => (
+                <motion.div
+                  key={course.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.7 + index * 0.1 }}
+                  className="group cursor-pointer"
+                >
+                  <Link to={`/courses/${course.slug}`}>
+                    <Card className="overflow-hidden border-0 bg-background shadow-lg hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1">
+                      <div className="relative">
+                        <img 
+                          src={course.thumbnail_url || codingImage} 
+                          alt={course.title} 
+                          className="w-full h-48 object-cover" 
+                        />
+                        <div className="absolute top-4 left-4 bg-accent text-accent-foreground px-3 py-1 rounded-full text-sm font-medium">
+                          {course.categories?.name || 'General'}
+                        </div>
+                        <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {Math.floor((course.total_duration || 0) / 60)}h
+                        </div>
+                      </div>
+                      <CardContent className="p-6">
+                        <h3 className="font-bold text-lg mb-3 line-clamp-2 group-hover:text-primary transition-colors">
+                          {course.title}
+                        </h3>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+                          <div className="flex items-center gap-1">
+                            <BookOpen className="h-4 w-4" />
+                            <span>{course.total_lessons || 0} lessons</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Users className="h-4 w-4" />
+                            <span>0 students</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 mb-4">
+                          <img 
+                            src={studentImage} 
+                            alt={course.profiles?.full_name || 'Instructor'} 
+                            className="w-8 h-8 rounded-full object-cover" 
+                          />
+                          <span className="text-sm font-medium text-foreground">
+                            {course.profiles?.full_name || 'Instructor'}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1">
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            <span className="font-medium text-foreground">4.8</span>
+                          </div>
+                          <span className="text-2xl font-bold text-primary">
+                            {course.price === 0 ? 'Free' : `$${course.price}`}
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </motion.div>
+              ))
+            ) : (
+              // No courses found
+              <div className="col-span-full text-center py-12">
+                <p className="text-muted-foreground text-lg">No courses available at the moment.</p>
+              </div>
+            )}
           </div>
         </div>
       </motion.section>

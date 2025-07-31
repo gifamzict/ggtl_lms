@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Menu, ChevronDown, ShoppingCart, User } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -22,25 +22,42 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/authStore';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-const categories = [
-  'Development',
-  'Business', 
-  'Design',
-  'Marketing',
-  'IT & Software',
-  'Personal Development',
-  'Photography',
-  'Music',
-  'Health & Fitness',
-  'Teaching & Academics'
-];
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 export function PublicNavbar() {
   const { user, signOut } = useAuth();
   const { openAuthModal } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('categories')
+          .select('*')
+          .order('name');
+        
+        if (error) {
+          console.error('Error fetching categories:', error);
+          return;
+        }
+        
+        setCategories(data || []);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
@@ -175,14 +192,23 @@ export function PublicNavbar() {
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56">
-                {categories.map((category) => (
-                  <DropdownMenuItem key={category} asChild>
-                    <Link to={`/category/${category.toLowerCase().replace(/\s+/g, '-')}`}>
-                      {category}
-                    </Link>
+              <DropdownMenuContent align="start" className="w-56 bg-background border shadow-lg z-50">
+                {categories.length > 0 ? (
+                  categories.map((category) => (
+                    <DropdownMenuItem key={category.id} asChild>
+                      <Link 
+                        to={`/courses?category=${category.id}`}
+                        className="flex items-center px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+                      >
+                        {category.name}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))
+                ) : (
+                  <DropdownMenuItem disabled>
+                    <span className="text-muted-foreground">Loading categories...</span>
                   </DropdownMenuItem>
-                ))}
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
 

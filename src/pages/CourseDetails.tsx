@@ -295,18 +295,21 @@ const CourseDetails = () => {
                 <div className="aspect-video bg-black relative">
                   {course.demo_video_url ? (
                     course.demo_video_url.includes('drive.google.com') ? (
-                      <iframe
-                        src={course.demo_video_url.includes('/preview') ? 
-                          course.demo_video_url : 
-                          course.demo_video_url.replace('/view', '/preview')
-                        }
-                        width="100%"
-                        height="100%"
-                        frameBorder="0"
-                        allow="autoplay"
-                        className="rounded-lg"
-                        title={`${course.title} preview`}
-                      />
+                      <div className="video-container relative w-full h-full overflow-hidden rounded-lg">
+                        <iframe
+                          src={course.demo_video_url.includes('/preview') ? 
+                            course.demo_video_url : 
+                            course.demo_video_url.replace('/view', '/preview')
+                          }
+                          width="100%"
+                          height="calc(100% + 100px)"
+                          frameBorder="0"
+                          allow="autoplay"
+                          className="absolute top-[-50px] left-0"
+                          title={`${course.title} preview`}
+                          style={{ width: '100%', height: 'calc(100% + 100px)' }}
+                        />
+                      </div>
                     ) : (
                       <ReactPlayer
                         url={course.demo_video_url}

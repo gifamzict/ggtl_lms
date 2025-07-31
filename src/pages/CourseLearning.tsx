@@ -319,15 +319,18 @@ const CourseLearning = () => {
           <div className="flex-1 bg-black flex items-center justify-center">
             <div className="w-full max-w-5xl aspect-video">
               {currentLesson.video_source === 'DRIVE' ? (
-                <iframe
-                  src={getVideoUrl(currentLesson)}
-                  width="100%"
-                  height="100%"
-                  frameBorder="0"
-                  allow="autoplay"
-                  className="rounded-lg"
-                  title={currentLesson.title}
-                />
+                <div className="video-container relative w-full overflow-hidden rounded-lg" style={{ paddingTop: '56.25%' }}>
+                  <iframe
+                    src={getVideoUrl(currentLesson)}
+                    width="100%"
+                    height="calc(100% + 100px)"
+                    frameBorder="0"
+                    allow="autoplay"
+                    className="absolute top-[-50px] left-0"
+                    title={currentLesson.title}
+                    style={{ width: '100%', height: 'calc(100% + 100px)' }}
+                  />
+                </div>
               ) : (
                 <ReactPlayer
                   url={getVideoUrl(currentLesson)}
