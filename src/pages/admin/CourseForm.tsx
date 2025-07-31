@@ -46,7 +46,7 @@ const sectionSchema = z.object({
 const courseSchema = z.object({
   title: z.string().min(1, "Course title is required"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  instructor: z.string().min(1, "Please select an instructor"),
+  //instructor: z.string().min(1, "Please select an instructor"),
   isFree: z.boolean(),
   price: z.coerce.number().min(0, "Price must be a positive number").optional(),
   category: z.string().min(1, "Please select a category"),
