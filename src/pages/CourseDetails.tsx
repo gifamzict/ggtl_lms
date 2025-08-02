@@ -365,29 +365,6 @@ const CourseDetails = () => {
               </CardContent>
             </Card>
 
-            {/* What You'll Learn */}
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-2xl font-bold mb-4">What you'll learn</h2>
-                <div className="grid md:grid-cols-2 gap-3">
-                  {[
-                    "Build 16 web development projects for your portfolio, ready to apply for junior developer jobs.",
-                    "After the course you will be able to build ANY website you want.",
-                    "Work as a freelance web developer.",
-                    "Master backend development with Node",
-                    "Learn the latest technologies, including Javascript, React, Node and even Web3 development.",
-                    "Build fully-fledged websites and web apps for your startup or business.",
-                    "Master frontend development with React",
-                    "Learn professional developer best practices."
-                  ].map((item, index) => (
-                    <div key={index} className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm">{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
 
             {/* Course Content */}
             <Card>
@@ -442,25 +419,6 @@ const CourseDetails = () => {
               </CardContent>
             </Card>
 
-            {/* Requirements */}
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-2xl font-bold mb-4">Requirements</h2>
-                <ul className="space-y-2">
-                  {[
-                    "No programming experience needed - I'll teach you everything you need to know",
-                    "A computer with access to the internet",
-                    "No paid software required",
-                    "I'll walk you through, step-by-step how to get all the software installed and set up"
-                  ].map((requirement, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 bg-foreground rounded-full mt-2 flex-shrink-0"></span>
-                      <span className="text-sm">{requirement}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
 
             {/* Description */}
             <Card>
