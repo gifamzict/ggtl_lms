@@ -157,14 +157,21 @@ const CourseLearning = () => {
     }
   };
 
-  const handleEnded = () => {
+  const handleEnded = async () => {
     if (currentLesson) {
-      saveProgress(currentLesson.id, currentLesson.duration, true);
-      // Auto-advance to next lesson
-      const currentIndex = lessons.findIndex(l => l.id === currentLesson.id);
-      if (currentIndex < lessons.length - 1) {
-        setCurrentLesson(lessons[currentIndex + 1]);
-      }
+      await saveProgress(currentLesson.id, currentLesson.duration, true);
+      toast.success('Lesson completed! 🎉');
+      
+      // Auto-advance to next lesson after a short delay
+      setTimeout(() => {
+        const currentIndex = lessons.findIndex(l => l.id === currentLesson.id);
+        if (currentIndex < lessons.length - 1) {
+          setCurrentLesson(lessons[currentIndex + 1]);
+          toast.success('Moving to next lesson...');
+        } else {
+          toast.success('Course completed! Congratulations! 🎉');
+        }
+      }, 2000);
     }
   };
 
@@ -336,7 +343,7 @@ const CourseLearning = () => {
                   url={getVideoUrl(currentLesson)}
                   width="100%"
                   height="100%"
-                  controls
+                  controls={true}
                   playing={isPlaying}
                   onPlay={() => setIsPlaying(true)}
                   onPause={() => setIsPlaying(false)}
@@ -347,6 +354,13 @@ const CourseLearning = () => {
                     if (progress?.watched_duration) {
                       // Resume from last position
                     }
+                  }}
+                  config={{
+                    file: {
+                      attributes: {
+                        controlsList: 'nodownload',
+                      },
+                    },
                   }}
                 />
               )}
