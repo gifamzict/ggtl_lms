@@ -39,7 +39,7 @@ enabled = false
 [functions]
 enabled = true
 
-[functions.admin-payment-settings]
+[functions."admin-payment-settings"]
 verify_jwt = true
 
 [functions.paystack-public-key]
