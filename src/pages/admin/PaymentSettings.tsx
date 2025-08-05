@@ -54,10 +54,14 @@ const PaymentSettings = () => {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const { error } = await supabase.functions.invoke('admin-payment-settings', {
+      console.log('Attempting to save payment settings:', settings);
+      
+      const { data, error } = await supabase.functions.invoke('admin-payment-settings', {
         method: 'PUT',
         body: settings
       });
+
+      console.log('Function response:', { data, error });
 
       if (error) throw error;
 
