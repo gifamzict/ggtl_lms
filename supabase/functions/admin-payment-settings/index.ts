@@ -64,24 +64,40 @@ serve(async (req) => {
   }
 
   try {
+    console.log("=== EDGE FUNCTION START ===");
+    console.log("Request method:", req.method);
+    console.log("Request headers:", Object.fromEntries(req.headers.entries()));
+    
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
       { auth: { persistSession: false } }
     );
 
+    console.log("=== CHECKING AUTHORIZATION ===");
+    
     // Verify admin authorization
     const authHeader = req.headers.get("Authorization");
+    console.log("Authorization header present:", !!authHeader);
+    
     if (!authHeader) {
+      console.error("No authorization header found");
       throw new Error("No authorization header");
     }
 
     const token = authHeader.replace("Bearer ", "");
+    console.log("Token extracted, length:", token.length);
+    
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
+    console.log("User data:", userData);
+    console.log("User error:", userError);
     
     if (userError || !userData.user) {
+      console.error("Authentication failed:", userError);
       throw new Error("Invalid authentication");
     }
+
+    console.log("User authenticated:", userData.user.id);
 
     // Check if user is super admin
     const { data: profile, error: profileError } = await supabaseClient
@@ -90,9 +106,20 @@ serve(async (req) => {
       .eq('user_id', userData.user.id)
       .single();
 
-    if (profileError || profile.role !== 'SUPER_ADMIN') {
+    console.log("Profile data:", profile);
+    console.log("Profile error:", profileError);
+
+    if (profileError) {
+      console.error("Profile lookup failed:", profileError);
+      throw new Error(`Profile lookup failed: ${profileError.message}`);
+    }
+    
+    if (!profile || profile.role !== 'SUPER_ADMIN') {
+      console.error("Insufficient permissions. User role:", profile?.role);
       throw new Error("Insufficient permissions - Super Admin access required");
     }
+    
+    console.log("=== AUTHORIZATION PASSED ===");
 
     const encryptionKey = Deno.env.get("PAYMENT_ENCRYPTION_KEY") || "default-key-change-in-production";
 
