@@ -55,6 +55,7 @@ const PaymentSettings = () => {
     setIsSaving(true);
     try {
       console.log('Attempting to save payment settings:', settings);
+      console.log('Current user session:', await supabase.auth.getSession());
       
       const { data, error } = await supabase.functions.invoke('admin-payment-settings', {
         method: 'PUT',
@@ -62,19 +63,37 @@ const PaymentSettings = () => {
       });
 
       console.log('Function response:', { data, error });
+      console.log('Full response data:', data);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Function invoke error:', error);
+        throw error;
+      }
+
+      // Check if the response indicates an error
+      if (data && data.error) {
+        console.error('Function returned error:', data.error);
+        throw new Error(data.error);
+      }
 
       toast({
         title: "Success",
         description: "Payment settings saved successfully"
       });
     } catch (error) {
-      console.error('Error saving payment settings:', error);
+      console.error('Full error object:', error);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      
+      let errorMessage = "Failed to save payment settings";
+      if (error.message) {
+        errorMessage += `: ${error.message}`;
+      }
+      
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to save payment settings"
+        description: errorMessage
       });
     } finally {
       setIsSaving(false);
