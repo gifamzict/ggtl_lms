@@ -23,12 +23,15 @@ import AdminSignup from "./pages/admin/AdminSignup";
 import ManageAdmins from "./pages/admin/ManageAdmins";
 import Students from "./pages/admin/Students";
 import AdminProfile from "./pages/admin/AdminProfile";
+import PaymentSettings from "./pages/admin/PaymentSettings";
 import StudentDashboard from "./pages/student/StudentDashboard";
 import StudentCourses from "./pages/student/StudentCourses";
 import Courses from "./pages/Courses";
 import CourseDetails from "./pages/CourseDetails";
 import CourseLearning from "./pages/CourseLearning";
 import NotFound from "./pages/NotFound";
+import AuthCallback from "./pages/AuthCallback";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +50,8 @@ const AppContent = () => {
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/about-us" element={<AboutUs />} />
                   <Route path="/contact-us" element={<ContactUs />} />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
+                  <Route path="/payment/success" element={<PaymentSuccess />} />
                   
                   {/* Public Admin Login/Signup (not protected) */}
                   <Route path="/admin/login" element={<AdminLogin />} />
@@ -64,6 +69,7 @@ const AppContent = () => {
                         <Route path="course-categories" element={<CourseCategories />} />
                         <Route path="manage-admins" element={<ManageAdmins />} />
                         <Route path="students" element={<Students />} />
+                        <Route path="payment-settings" element={<PaymentSettings />} />
                         <Route path="profile" element={<AdminProfile />} />
                       </Routes>
                     </AdminAuthGuard>
