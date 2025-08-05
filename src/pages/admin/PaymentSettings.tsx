@@ -62,6 +62,17 @@ const PaymentSettings = () => {
       console.log('User ID:', session.data.session?.user?.id);
       console.log('Access token present:', !!session.data.session?.access_token);
       
+      // Check user role
+      if (session.data.session?.user?.id) {
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('user_id', session.data.session.user.id)
+          .single();
+        console.log('User profile:', profile);
+        console.log('Profile error:', profileError);
+      }
+      
       console.log('=== INVOKING EDGE FUNCTION ===');
       console.log('Function name: admin-payment-settings');
       console.log('Method: PUT');
