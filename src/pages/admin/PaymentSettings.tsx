@@ -79,8 +79,11 @@ const PaymentSettings = () => {
       console.log('Body:', settings);
       
       const { data, error } = await supabase.functions.invoke('admin-payment-settings', {
-        method: 'PUT',
-        body: settings
+        body: settings,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.data.session?.access_token}`
+        }
       });
 
       console.log('=== EDGE FUNCTION RESPONSE ===');
