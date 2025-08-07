@@ -79,6 +79,7 @@ const PaymentSettings = () => {
       console.log('Body:', settings);
       
       const { data, error } = await supabase.functions.invoke('admin-payment-settings', {
+        method: 'PUT',
         body: settings,
         headers: {
           'Content-Type': 'application/json',
