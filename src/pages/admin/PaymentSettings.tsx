@@ -32,9 +32,7 @@ const PaymentSettings = () => {
 
   const fetchSettings = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('admin-payment-settings', {
-        method: 'GET'
-      });
+      const { data, error } = await supabase.functions.invoke('admin-payment-settings');
 
       if (error) throw error;
 
@@ -54,69 +52,23 @@ const PaymentSettings = () => {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      console.log('=== STARTING SAVE PROCESS ===');
-      console.log('Settings to save:', settings);
-      
-      const session = await supabase.auth.getSession();
-      console.log('Current session:', session);
-      console.log('User ID:', session.data.session?.user?.id);
-      console.log('Access token present:', !!session.data.session?.access_token);
-      
-      // Check user role
-      if (session.data.session?.user?.id) {
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('user_id', session.data.session.user.id)
-          .single();
-        console.log('User profile:', profile);
-        console.log('Profile error:', profileError);
-      }
-      
-      console.log('=== INVOKING EDGE FUNCTION ===');
-      console.log('Function name: admin-payment-settings');
-      console.log('Method: PUT');
-      console.log('Body:', settings);
-      
       const { data, error } = await supabase.functions.invoke('admin-payment-settings', {
-        method: 'PUT',
-        body: settings
+        body: { ...settings, _method: 'PUT' }
       });
 
-      console.log('=== EDGE FUNCTION RESPONSE ===');
-      console.log('Raw response data:', data);
-      console.log('Raw response error:', error);
-      console.log('Error type:', typeof error);
-      console.log('Error properties:', error ? Object.keys(error) : 'No error object');
-
-      if (error) {
-        console.error('=== FUNCTION INVOKE ERROR ===');
-        console.error('Error object:', error);
-        console.error('Error message:', error.message);
-        console.error('Error context:', error.context);
-        console.error('Error details:', error.details);
-        throw error;
-      }
+      if (error) throw error;
 
       // Check if the response indicates an error
       if (data && data.error) {
-        console.error('=== FUNCTION RETURNED ERROR ===');
-        console.error('Function error:', data.error);
         throw new Error(data.error);
       }
 
-      console.log('=== SUCCESS ===');
       toast({
         title: "Success",
         description: "Payment settings saved successfully"
       });
     } catch (error) {
-      console.error('=== CATCH BLOCK ===');
-      console.error('Full error object:', error);
-      console.error('Error constructor:', error.constructor.name);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-      console.error('Error cause:', error.cause);
+      console.error('Error saving payment settings:', error);
       
       let errorMessage = "Failed to save payment settings";
       if (error.message) {

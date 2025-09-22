@@ -123,7 +123,27 @@ serve(async (req) => {
 
     const encryptionKey = Deno.env.get("PAYMENT_ENCRYPTION_KEY") || "default-key-change-in-production";
 
-    if (req.method === "GET") {
+    // Parse request body for all POST requests (Supabase client uses POST)
+    let body = null;
+    let httpMethod = "GET"; // Default to GET
+    
+    if (req.method === "POST") {
+      try {
+        body = await req.json();
+        // Check if _method is provided in body to override HTTP method
+        if (body._method) {
+          httpMethod = body._method;
+          delete body._method; // Remove the _method property
+        }
+      } catch (e) {
+        console.log("No JSON body or invalid JSON");
+      }
+    }
+
+    console.log("Effective HTTP method:", httpMethod);
+    console.log("Request body:", body);
+
+    if (httpMethod === "GET") {
       // Fetch payment settings
       const { data: settings, error } = await supabaseClient
         .from('payment_gateway_settings')
@@ -159,8 +179,11 @@ serve(async (req) => {
       );
     }
 
-    if (req.method === "PUT") {
-      const body = await req.json();
+    if (httpMethod === "PUT") {
+      if (!body) {
+        throw new Error("Request body is required for PUT requests");
+      }
+
       const { public_key, secret_key, is_active } = body;
 
       let encryptedSecretKey = null;
