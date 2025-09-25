@@ -108,106 +108,149 @@ const Index = () => {
 
   // Always show the public home page regardless of authentication status
 
-  return <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <motion.section initial={{
-      opacity: 0
-    }} animate={{
-      opacity: 1
-    }} transition={{
-      duration: 0.8
-    }} className="relative py-20 lg:py-32 overflow-hidden" style={{
-      backgroundImage: `linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(29, 78, 216, 0.95)), url(${heroImage})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center'
-    }}>
-        <div className="container mx-auto px-4 relative z-10">
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Hero Section - Modern Glassmorphism Design */}
+      <motion.section 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        className="relative section-padding overflow-hidden bg-gradient-to-br from-primary-400 via-primary-500 to-primary-700"
+      >
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-grid opacity-20"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-primary-900/20 to-transparent"></div>
+        
+        {/* Floating Elements */}
+        <div className="absolute top-20 left-10 w-20 h-20 bg-accent-400/20 rounded-full blur-xl animate-float"></div>
+        <div className="absolute top-40 right-20 w-32 h-32 bg-primary-300/20 rounded-full blur-2xl animate-float" style={{animationDelay: '1s'}}></div>
+        <div className="absolute bottom-20 left-1/4 w-16 h-16 bg-accent-300/30 rounded-full blur-lg animate-float" style={{animationDelay: '2s'}}></div>
+
+        <div className="container-wide px-4 relative z-10">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <motion.div initial={{
-            opacity: 0,
-            y: 30
-          }} animate={{
-            opacity: 1,
-            y: 0
-          }} transition={{
-            duration: 0.8,
-            delay: 0.2
-          }} className="text-white">
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-8 border border-white/20">
-                <Sparkles className="h-4 w-4" />
-                <span className="text-sm font-medium">Transform Your Career</span>
+            {/* Left Column - Content */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="text-white"
+            >
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 glass rounded-full px-6 py-3 mb-8 border border-white/30">
+                <Sparkles className="h-5 w-5" />
+                <span className="text-sm font-semibold">Transform Your Career Today</span>
               </div>
-              <h1 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+              
+              {/* Main Heading */}
+              <h1 className="text-display mb-8 leading-tight">
                 Master In-Demand
-                <span className="block text-accent"> Tech Skills</span>
+                <span className="block text-gradient-accent bg-gradient-to-r from-accent-300 to-accent-100 bg-clip-text text-transparent">
+                  Tech Skills
+                </span>
               </h1>
-              <p className="text-xl mb-8 text-white/90 leading-relaxed max-w-lg">
+              
+              {/* Subtitle */}
+              <p className="text-body-large mb-12 text-white/90 leading-relaxed max-w-2xl">
                 Join thousands of professionals learning from industry experts. 
                 Build the skills that matter most in today's digital economy.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" onClick={openAuthModal} className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-8 py-4 text-lg h-auto">
+              
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-6">
+                <Button 
+                  size="xl" 
+                  variant="accent"
+                  onClick={openAuthModal} 
+                  className="group shadow-2xl"
+                >
                   Start Learning Today
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
-                <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 px-8 py-4 text-lg h-auto backdrop-blur-sm">
+                <Button 
+                  size="xl" 
+                  variant="glass"
+                  className="backdrop-blur-md"
+                >
                   <Play className="mr-2 h-5 w-5" />
                   Watch Preview
                 </Button>
               </div>
             </motion.div>
             
-            <motion.div initial={{
-            opacity: 0,
-            scale: 0.9
-          }} animate={{
-            opacity: 1,
-            scale: 1
-          }} transition={{
-            duration: 0.8,
-            delay: 0.4
-          }} className="relative">
-              <div className="bg-white/95 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20">
+            {/* Right Column - Course Preview Card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="relative"
+            >
+              <div className="card-glass p-8 rounded-3xl shadow-glass border border-white/20 backdrop-blur-xl">
+                {/* Browser Mockup Header */}
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
                     <div className="w-3 h-3 bg-red-400 rounded-full"></div>
                     <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
                     <div className="w-3 h-3 bg-green-400 rounded-full"></div>
                   </div>
-                  <div className="flex items-center gap-2 bg-primary/10 rounded-lg px-3 py-1">
-                    <Clock className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-medium text-primary">45h Total</span>
+                  <div className="flex items-center gap-2 bg-primary-500/20 rounded-xl px-4 py-2 backdrop-blur-sm">
+                    <Clock className="h-4 w-4 text-white" />
+                    <span className="text-sm font-semibold text-white">45h Total</span>
                   </div>
                 </div>
-                <div className="mb-4">
-                  <span className="inline-block bg-accent/10 text-accent text-xs font-medium px-3 py-1 rounded-full mb-3">
+                
+                {/* Course Content */}
+                <div className="mb-6">
+                  <div className="inline-block bg-accent-500/20 text-accent-300 text-xs font-bold px-4 py-2 rounded-full mb-4 backdrop-blur-sm">
                     BESTSELLER
-                  </span>
-                  <h3 className="text-2xl font-bold text-foreground mb-2">
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-4">
                     Complete Web Development Bootcamp
                   </h3>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-6 text-sm text-white/80">
+                    <div className="flex items-center gap-2">
                       <BookOpen className="h-4 w-4" />
                       <span>32 Lessons</span>
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-2">
                       <Users className="h-4 w-4" />
                       <span>2.4k Students</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <div className="flex items-center gap-2">
+                      <Star className="h-4 w-4 text-accent-400" />
                       <span>4.9</span>
                     </div>
                   </div>
                 </div>
-                <img src={codingImage} alt="Coding workspace" className="w-full h-32 object-cover rounded-xl mb-4" />
+                
+                {/* Course Image */}
+                <div className="relative mb-6 rounded-2xl overflow-hidden">
+                  <img 
+                    src={codingImage} 
+                    alt="Coding workspace" 
+                    className="w-full h-40 object-cover" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                </div>
+                
+                {/* Instructor & Price */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <img src={studentImage} alt="Instructor" className="w-8 h-8 rounded-full object-cover" />
-                    <span className="text-sm font-medium text-foreground">Sarah Chen</span>
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={studentImage} 
+                      alt="Instructor" 
+                      className="w-10 h-10 rounded-full object-cover ring-2 ring-white/30" 
+                    />
+                    <span className="text-sm font-semibold text-white">Sarah Chen</span>
                   </div>
-                  <span className="text-2xl font-bold text-primary">$89</span>
+                  <span className="text-3xl font-bold text-accent-300">$89</span>
+                </div>
+              </div>
+              
+              {/* Floating Stats */}
+              <div className="absolute -bottom-6 -left-4 card-glass p-4 rounded-2xl border border-white/20">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-white">98%</div>
+                  <div className="text-xs text-white/70">Success Rate</div>
                 </div>
               </div>
             </motion.div>
@@ -215,94 +258,110 @@ const Index = () => {
         </div>
       </motion.section>
 
-      {/* Trust Bar */}
-      <motion.section initial={{
-      opacity: 0,
-      y: 20
-    }} animate={{
-      opacity: 1,
-      y: 0
-    }} transition={{
-      duration: 0.6,
-      delay: 0.3
-    }} className="py-16 bg-background">
-        <div className="container mx-auto px-4">
-          <p className="text-center text-muted-foreground mb-12 text-lg">
+      {/* Trust Bar - Modern Design */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.3 }}
+        className="py-20 bg-background-secondary/30"
+      >
+        <div className="container-wide px-4">
+          <p className="text-center text-muted-foreground mb-12 text-lg font-medium">
             Trusted by professionals from leading companies worldwide
           </p>
-          <div className="flex justify-center items-center gap-12 flex-wrap opacity-70">
-            <span className="text-2xl font-bold text-foreground">Google</span>
-            <span className="text-2xl font-bold text-foreground">Microsoft</span>
-            <span className="text-2xl font-bold text-foreground">Amazon</span>
-            <span className="text-2xl font-bold text-foreground">Meta</span>
-            <span className="text-2xl font-bold text-foreground">Netflix</span>
+          <div className="flex justify-center items-center gap-16 flex-wrap">
+            {['Google', 'Microsoft', 'Amazon', 'Meta', 'Netflix'].map((company, index) => (
+              <motion.span
+                key={company}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * index }}
+                className="text-2xl font-bold text-foreground/60 hover:text-primary transition-colors cursor-default"
+              >
+                {company}
+              </motion.span>
+            ))}
           </div>
         </div>
       </motion.section>
 
-      {/* Features Section */}
-      <motion.section initial={{
-      opacity: 0
-    }} animate={{
-      opacity: 1
-    }} transition={{
-      duration: 0.8,
-      delay: 0.4
-    }} className="py-24 bg-muted/30">
-        <div className="container mx-auto px-4">
+      {/* Features Section - Modern Card Design */}
+      <motion.section
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.4 }}
+        className="section-padding bg-background"
+      >
+        <div className="container-wide px-4">
           <div className="text-center mb-20">
-            <div className="inline-flex items-center gap-2 bg-primary/10 rounded-full px-4 py-2 mb-6">
-              <Shield className="h-5 w-5 text-primary" />
-              <span className="text-primary font-medium">Why Choose GGTL</span>
+            <div className="inline-flex items-center gap-2 bg-primary-50 text-primary-600 rounded-full px-6 py-3 mb-6 shadow-sm">
+              <Shield className="h-5 w-5" />
+              <span className="font-semibold">Why Choose GGTL</span>
             </div>
-            <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">
+            <h2 className="text-headline text-foreground mb-6">
               Learn with Confidence
             </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            <p className="text-body-large text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Our platform combines expert instruction with cutting-edge technology 
               to deliver an unparalleled learning experience.
             </p>
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[{
-            icon: <BookOpen className="h-8 w-8" />,
-            title: "Expert Instructors",
-            description: "Learn from industry veterans with real-world experience and proven track records.",
-            color: "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400"
-          }, {
-            icon: <CheckCircle className="h-8 w-8" />,
-            title: "Lifetime Access",
-            description: "Get unlimited access to all course materials and future updates forever.",
-            color: "bg-green-50 text-green-600 dark:bg-green-950 dark:text-green-400"
-          }, {
-            icon: <Award className="h-8 w-8" />,
-            title: "Certificates",
-            description: "Earn industry-recognized certificates to showcase your achievements.",
-            color: "bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400"
-          }, {
-            icon: <Globe className="h-8 w-8" />,
-            title: "Global Community",
-            description: "Connect with learners worldwide and build your professional network.",
-            color: "bg-orange-50 text-orange-600 dark:bg-orange-950 dark:text-orange-400"
-          }].map((feature, index) => <motion.div key={index} initial={{
-            opacity: 0,
-            y: 20
-          }} animate={{
-            opacity: 1,
-            y: 0
-          }} transition={{
-            duration: 0.6,
-            delay: 0.5 + index * 0.1
-          }} className="group">
-                <Card className="h-full p-8 hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1 border-0 bg-background">
-                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 ${feature.color}`}>
+            {[
+              {
+                icon: <BookOpen className="h-8 w-8" />,
+                title: "Expert Instructors",
+                description: "Learn from industry veterans with real-world experience and proven track records.",
+                gradient: "from-primary-500 to-primary-600",
+                bg: "bg-primary-50",
+                iconColor: "text-primary-600"
+              },
+              {
+                icon: <CheckCircle className="h-8 w-8" />,
+                title: "Lifetime Access",
+                description: "Get unlimited access to all course materials and future updates forever.",
+                gradient: "from-success to-success/80",
+                bg: "bg-green-50",
+                iconColor: "text-green-600"
+              },
+              {
+                icon: <Award className="h-8 w-8" />,
+                title: "Certificates",
+                description: "Earn industry-recognized certificates to showcase your achievements.",
+                gradient: "from-accent-500 to-accent-600",
+                bg: "bg-accent-50",
+                iconColor: "text-accent-600"
+              },
+              {
+                icon: <Globe className="h-8 w-8" />,
+                title: "Global Community",
+                description: "Connect with learners worldwide and build your professional network.",
+                gradient: "from-indigo-500 to-indigo-600",
+                bg: "bg-indigo-50",
+                iconColor: "text-indigo-600"
+              }
+            ].map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
+                className="group"
+              >
+                <div className="card-premium p-8 h-full rounded-3xl interactive-hover border-0 bg-card">
+                  <div className={`w-20 h-20 ${feature.bg} rounded-3xl flex items-center justify-center mb-6 ${feature.iconColor} group-hover:scale-110 transition-transform duration-300`}>
                     {feature.icon}
                   </div>
-                  <h3 className="text-xl font-bold text-foreground mb-4">{feature.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
-                </Card>
-              </motion.div>)}
+                  <h3 className="text-xl font-bold text-foreground mb-4 group-hover:text-primary transition-colors">
+                    {feature.title}
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </motion.section>
