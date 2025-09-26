@@ -603,6 +603,7 @@ const Index = () => {
           </motion.div>
         </div>
       </motion.section>
-    </div>;
+    </div>
+  );
 };
 export default Index;
