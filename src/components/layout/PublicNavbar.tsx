@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Menu, ChevronDown, ShoppingCart, User } from 'lucide-react';
+import { Search, Menu, ChevronDown, ShoppingCart, User, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,7 +19,10 @@ interface Category {
 export function PublicNavbar() {
   const {
     user,
-    signOut
+    userProfile,
+    signOut,
+    isAdmin,
+    isSuperAdmin
   } = useAuth();
   const {
     openAuthModal
@@ -211,6 +214,28 @@ export function PublicNavbar() {
                       Dashboard
                     </Link>
                   </DropdownMenuItem>
+                  
+                  {/* Admin Access */}
+                  {(isAdmin() || isSuperAdmin()) && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin" className="flex items-center text-primary">
+                          <Shield className="mr-2 h-4 w-4" />
+                          Admin Panel
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  
+                  {/* Debug Access - Remove in production */}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin-direct" className="flex items-center text-muted-foreground text-xs">
+                      🔧 Admin Debug
+                    </Link>
+                  </DropdownMenuItem>
+                  
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     Log out

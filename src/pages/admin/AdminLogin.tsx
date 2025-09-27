@@ -28,9 +28,13 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
+      console.log('Attempting admin login with:', { email, roleFilter: ['ADMIN', 'SUPER_ADMIN'] });
       const { error } = await signIn(email, password, ['ADMIN', 'SUPER_ADMIN']);
       if (!error) {
+        console.log('Admin login successful, navigating to /admin');
         navigate('/admin');
+      } else {
+        console.error('Admin login failed:', error);
       }
     } catch (error) {
       console.error('Admin login error:', error);

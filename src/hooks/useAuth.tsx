@@ -134,12 +134,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string, roleFilter?: string[]) => {
+    console.log('signIn called with:', { email, roleFilter });
+    
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
     });
 
+    console.log('Supabase auth response:', { data: !!data, error });
+
     if (error) {
+      console.error('Supabase auth error:', error);
       toast({
         variant: "destructive",
         title: "Sign in failed",
@@ -150,8 +155,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Check role if roleFilter is provided
     if (roleFilter && data.user) {
+      console.log('Checking role for user:', data.user.id);
       const profile = await fetchUserProfile(data.user.id);
+      console.log('User profile:', profile);
+      
       if (profile && !roleFilter.includes(profile.role)) {
+        console.log('Role mismatch. User role:', profile.role, 'Required roles:', roleFilter);
         await supabase.auth.signOut();
         const roleError = new Error(`Access denied. This login is for ${roleFilter.join(' or ')} only.`);
         toast({
@@ -168,6 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       description: "You have successfully signed in."
     });
 
+    console.log('Sign in successful');
     return { error: null };
   };
 

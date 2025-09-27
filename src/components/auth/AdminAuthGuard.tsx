@@ -35,7 +35,8 @@ export function AdminAuthGuard({ children }: AdminAuthGuardProps) {
     user: user?.id,
     userProfile: userProfile?.role,
     isAdminResult: isAdmin(),
-    loading
+    loading,
+    userEmail: user?.email
   });
 
   // Check if user is authenticated and has admin privileges

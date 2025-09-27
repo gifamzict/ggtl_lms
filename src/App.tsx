@@ -32,6 +32,8 @@ import CourseLearning from "./pages/CourseLearning";
 import NotFound from "./pages/NotFound";
 import AuthCallback from "./pages/AuthCallback";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import AdminTest from "./pages/AdminTest";
+import AdminDirectAccess from "./pages/AdminDirectAccess";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +58,8 @@ const AppContent = () => {
                   {/* Public Admin Login/Signup (not protected) */}
                   <Route path="/admin/login" element={<AdminLogin />} />
                   <Route path="/admin/signup" element={<AdminSignup />} />
+                  <Route path="/admin-test" element={<AdminTest />} />
+                  <Route path="/admin-direct" element={<AdminDirectAccess />} />
                   
                   {/* Protected Admin Routes */}
                   <Route path="/admin/*" element={
