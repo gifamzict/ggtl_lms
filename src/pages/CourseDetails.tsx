@@ -177,27 +177,42 @@ const CourseDetails = () => {
 
     if (!course) return;
 
-    if (course.price > 0) {
-      alert('Payment for courses will be available soon.');
-      return;
-    }
-
     setEnrolling(true);
+    
     try {
-      const { error } = await supabase
-        .from('enrollments')
-        .insert({
-          user_id: user.id,
-          course_id: course.id
+      if (course.price > 0) {
+        // Handle paid course with Paystack
+        const { data: paymentData, error: paymentError } = await supabase.functions.invoke('paystack-initialize', {
+          body: { courseId: course.id }
         });
 
-      if (error) throw error;
+        if (paymentError) {
+          throw new Error(paymentError.message || 'Failed to initialize payment');
+        }
 
-      setIsEnrolled(true);
-      toast.success('Successfully enrolled in course!');
+        if (paymentData?.authorization_url) {
+          // Redirect to Paystack payment page
+          window.location.href = paymentData.authorization_url;
+        } else {
+          throw new Error('Payment initialization failed');
+        }
+      } else {
+        // Handle free course enrollment
+        const { error } = await supabase
+          .from('enrollments')
+          .insert({
+            user_id: user.id,
+            course_id: course.id
+          });
+
+        if (error) throw error;
+
+        setIsEnrolled(true);
+        toast.success('Successfully enrolled in course!');
+      }
     } catch (error) {
       console.error('Error enrolling:', error);
-      toast.error('Failed to enroll in course');
+      toast.error(error.message || 'Failed to enroll in course');
     } finally {
       setEnrolling(false);
     }

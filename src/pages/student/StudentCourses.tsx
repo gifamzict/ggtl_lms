@@ -100,32 +100,51 @@ export default function StudentCourses() {
     setEnrollingCourseId(courseId);
     
     try {
-      const { error } = await supabase
-        .from('enrollments')
-        .insert({
-          user_id: user.id,
-          course_id: courseId,
-          progress_percentage: 0
+      if (!isFree) {
+        // Handle paid course with Paystack
+        const { data: paymentData, error: paymentError } = await supabase.functions.invoke('paystack-initialize', {
+          body: { courseId }
         });
 
-      if (error) {
-        console.error('Error enrolling in course:', error);
-        toast.error('Failed to enroll in course');
-        return;
-      }
+        if (paymentError) {
+          throw new Error(paymentError.message || 'Failed to initialize payment');
+        }
 
-      // Update local state
-      setCourses(prev => prev.map(course => 
-        course.id === courseId 
-          ? { ...course, isEnrolled: true, progress: 0 }
-          : course
-      ));
-      setEnrolledCourseIds(prev => new Set([...prev, courseId]));
-      
-      toast.success('Successfully enrolled in course!');
+        if (paymentData?.authorization_url) {
+          // Redirect to Paystack payment page
+          window.location.href = paymentData.authorization_url;
+        } else {
+          throw new Error('Payment initialization failed');
+        }
+      } else {
+        // Handle free course enrollment
+        const { error } = await supabase
+          .from('enrollments')
+          .insert({
+            user_id: user.id,
+            course_id: courseId,
+            progress_percentage: 0
+          });
+
+        if (error) {
+          console.error('Error enrolling in course:', error);
+          toast.error('Failed to enroll in course');
+          return;
+        }
+
+        // Update local state
+        setCourses(prev => prev.map(course => 
+          course.id === courseId 
+            ? { ...course, isEnrolled: true, progress: 0 }
+            : course
+        ));
+        setEnrolledCourseIds(prev => new Set([...prev, courseId]));
+        
+        toast.success('Successfully enrolled in course!');
+      }
     } catch (error) {
       console.error('Error enrolling in course:', error);
-      toast.error('Failed to enroll in course');
+      toast.error(error.message || 'Failed to enroll in course');
     } finally {
       setEnrollingCourseId(null);
     }
