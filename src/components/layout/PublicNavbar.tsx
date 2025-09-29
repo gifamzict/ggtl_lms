@@ -245,23 +245,24 @@ export function PublicNavbar() {
 <DropdownMenuSeparator />
 
 
+  < DropdownMenuItem asChild >
 
-  </DropdownMenuItem>
+    </DropdownMenuItem>
 
-  < DropdownMenuSeparator />
-  <DropdownMenuItem onClick={ handleSignOut }>
-    Log out
-      </DropdownMenuItem>
-      </DropdownMenuContent>
-      </DropdownMenu>
-      </> : <>
-      < Button variant = "outline" onClick = { openAuthModal } className = "hover:scale-105 transition-transform" >
-        Log In
-          </Button>
-          < Button onClick = { openAuthModal } className = "hover:scale-105 transition-transform bg-primary text-primary-foreground hover:bg-primary/90" >
-            Sign Up
-              </Button>
-              </>}
+    < DropdownMenuSeparator />
+    <DropdownMenuItem onClick={ handleSignOut }>
+      Log out
+        </DropdownMenuItem>
+        </DropdownMenuContent>
+        </DropdownMenu>
+        </> : <>
+        < Button variant = "outline" onClick = { openAuthModal } className = "hover:scale-105 transition-transform" >
+          Log In
+            </Button>
+            < Button onClick = { openAuthModal } className = "hover:scale-105 transition-transform bg-primary text-primary-foreground hover:bg-primary/90" >
+              Sign Up
+                </Button>
+                </>}
 </div>
   </div>
   </motion.header>;
