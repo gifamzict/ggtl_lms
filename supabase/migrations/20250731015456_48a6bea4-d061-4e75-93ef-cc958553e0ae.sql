@@ -16,13 +16,6 @@ $$ LANGUAGE SQL SECURITY DEFINER STABLE;
 
 -- Create RLS policies for role-based access
 
--- Admin and Super Admin can view all profiles
-CREATE POLICY "Admins can view all profiles" ON public.profiles
-FOR SELECT USING (
-  public.get_current_user_role() IN ('ADMIN', 'SUPER_ADMIN')
-  OR user_id = auth.uid()
-);
-
 -- Only Super Admins can create new admin accounts
 CREATE POLICY "Super Admins can create admin accounts" ON public.profiles
 FOR INSERT WITH CHECK (

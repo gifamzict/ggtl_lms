@@ -1,14 +1,32 @@
 -- Create enum for user roles
-CREATE TYPE public.user_role AS ENUM ('STUDENT', 'INSTRUCTOR', 'ADMIN');
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN
+        CREATE TYPE public.user_role AS ENUM ('STUDENT', 'INSTRUCTOR', 'ADMIN');
+    END IF;
+END
+$$;
 
 -- Create enum for video sources
-CREATE TYPE public.video_source AS ENUM ('UPLOAD', 'DRIVE', 'YOUTUBE', 'VIMEO');
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'video_source') THEN
+        CREATE TYPE public.video_source AS ENUM ('UPLOAD', 'DRIVE', 'YOUTUBE', 'VIMEO');
+    END IF;
+END
+$$;
 
 -- Create enum for course status
-CREATE TYPE public.course_status AS ENUM ('DRAFT', 'PUBLISHED', 'ARCHIVED');
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'course_status') THEN
+        CREATE TYPE public.course_status AS ENUM ('DRAFT', 'PUBLISHED', 'ARCHIVED');
+    END IF;
+END
+$$;
 
 -- Create profiles table for additional user information
-CREATE TABLE public.profiles (
+CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
   full_name TEXT NOT NULL,
@@ -22,7 +40,7 @@ CREATE TABLE public.profiles (
 );
 
 -- Create categories table
-CREATE TABLE public.categories (
+CREATE TABLE IF NOT EXISTS public.categories (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   description TEXT,
@@ -31,7 +49,7 @@ CREATE TABLE public.categories (
 );
 
 -- Create courses table
-CREATE TABLE public.courses (
+CREATE TABLE IF NOT EXISTS public.courses (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   title TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
@@ -48,7 +66,7 @@ CREATE TABLE public.courses (
 );
 
 -- Create lessons table
-CREATE TABLE public.lessons (
+CREATE TABLE IF NOT EXISTS public.lessons (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   title TEXT NOT NULL,
   description TEXT,
@@ -63,7 +81,7 @@ CREATE TABLE public.lessons (
 );
 
 -- Create enrollments table
-CREATE TABLE public.enrollments (
+CREATE TABLE IF NOT EXISTS public.enrollments (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES public.profiles(user_id) ON DELETE CASCADE,
   course_id UUID NOT NULL REFERENCES public.courses(id) ON DELETE CASCADE,
@@ -74,7 +92,7 @@ CREATE TABLE public.enrollments (
 );
 
 -- Create reviews table
-CREATE TABLE public.reviews (
+CREATE TABLE IF NOT EXISTS public.reviews (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES public.profiles(user_id) ON DELETE CASCADE,
   course_id UUID NOT NULL REFERENCES public.courses(id) ON DELETE CASCADE,
@@ -85,7 +103,7 @@ CREATE TABLE public.reviews (
 );
 
 -- Create lesson progress table
-CREATE TABLE public.lesson_progress (
+CREATE TABLE IF NOT EXISTS public.lesson_progress (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES public.profiles(user_id) ON DELETE CASCADE,
   lesson_id UUID NOT NULL REFERENCES public.lessons(id) ON DELETE CASCADE,
@@ -107,37 +125,45 @@ ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lesson_progress ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS policies for profiles
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.profiles;
 CREATE POLICY "Public profiles are viewable by everyone" 
 ON public.profiles FOR SELECT 
 USING (true);
 
+DROP POLICY IF EXISTS "Users can insert their own profile" ON public.profiles;
 CREATE POLICY "Users can insert their own profile" 
 ON public.profiles FOR INSERT 
 WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
 CREATE POLICY "Users can update their own profile" 
 ON public.profiles FOR UPDATE 
 USING (auth.uid() = user_id);
 
 -- Create RLS policies for categories
+DROP POLICY IF EXISTS "Categories are viewable by everyone" ON public.categories;
 CREATE POLICY "Categories are viewable by everyone" 
 ON public.categories FOR SELECT 
 USING (true);
 
 -- Create RLS policies for courses
+DROP POLICY IF EXISTS "Published courses are viewable by everyone" ON public.courses;
 CREATE POLICY "Published courses are viewable by everyone" 
 ON public.courses FOR SELECT 
 USING (status = 'PUBLISHED' OR instructor_id = auth.uid());
 
+DROP POLICY IF EXISTS "Instructors can create courses" ON public.courses;
 CREATE POLICY "Instructors can create courses" 
 ON public.courses FOR INSERT 
 WITH CHECK (auth.uid() = instructor_id);
 
+DROP POLICY IF EXISTS "Instructors can update their own courses" ON public.courses;
 CREATE POLICY "Instructors can update their own courses" 
 ON public.courses FOR UPDATE 
 USING (auth.uid() = instructor_id);
 
 -- Create RLS policies for lessons
+DROP POLICY IF EXISTS "Lessons are viewable by course instructors and enrolled students" ON public.lessons;
 CREATE POLICY "Lessons are viewable by course instructors and enrolled students" 
 ON public.lessons FOR SELECT 
 USING (
@@ -148,6 +174,7 @@ USING (
   )
 );
 
+DROP POLICY IF EXISTS "Instructors can manage their course lessons" ON public.lessons;
 CREATE POLICY "Instructors can manage their course lessons" 
 ON public.lessons FOR ALL 
 USING (
@@ -159,19 +186,23 @@ USING (
 );
 
 -- Create RLS policies for enrollments
+DROP POLICY IF EXISTS "Users can view their own enrollments" ON public.enrollments;
 CREATE POLICY "Users can view their own enrollments" 
 ON public.enrollments FOR SELECT 
 USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can enroll in courses" ON public.enrollments;
 CREATE POLICY "Users can enroll in courses" 
 ON public.enrollments FOR INSERT 
 WITH CHECK (auth.uid() = user_id);
 
 -- Create RLS policies for reviews
+DROP POLICY IF EXISTS "Reviews are viewable by everyone" ON public.reviews;
 CREATE POLICY "Reviews are viewable by everyone" 
 ON public.reviews FOR SELECT 
 USING (true);
 
+DROP POLICY IF EXISTS "Enrolled users can create reviews" ON public.reviews;
 CREATE POLICY "Enrolled users can create reviews" 
 ON public.reviews FOR INSERT 
 WITH CHECK (
@@ -184,10 +215,12 @@ WITH CHECK (
 );
 
 -- Create RLS policies for lesson progress
+DROP POLICY IF EXISTS "Users can view their own lesson progress" ON public.lesson_progress;
 CREATE POLICY "Users can view their own lesson progress" 
 ON public.lesson_progress FOR SELECT 
 USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can create/update their own lesson progress" ON public.lesson_progress;
 CREATE POLICY "Users can create/update their own lesson progress" 
 ON public.lesson_progress FOR ALL 
 USING (auth.uid() = user_id) 
@@ -211,6 +244,7 @@ END;
 $$;
 
 -- Create trigger for new user registration
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
@@ -225,18 +259,22 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create triggers for updated_at
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON public.profiles;
 CREATE TRIGGER update_profiles_updated_at
   BEFORE UPDATE ON public.profiles
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_courses_updated_at ON public.courses;
 CREATE TRIGGER update_courses_updated_at
   BEFORE UPDATE ON public.courses
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_lessons_updated_at ON public.lessons;
 CREATE TRIGGER update_lessons_updated_at
   BEFORE UPDATE ON public.lessons
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_lesson_progress_updated_at ON public.lesson_progress;
 CREATE TRIGGER update_lesson_progress_updated_at
   BEFORE UPDATE ON public.lesson_progress
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
@@ -247,4 +285,5 @@ INSERT INTO public.categories (name, description, slug) VALUES
 ('Business', 'Business and entrepreneurship courses', 'business'),
 ('Design', 'UI/UX and graphic design courses', 'design'),
 ('Marketing', 'Digital marketing and advertising', 'marketing'),
-('Personal Development', 'Self-improvement and productivity', 'personal-development');
+('Personal Development', 'Self-improvement and productivity', 'personal-development')
+ON CONFLICT (name) DO NOTHING;

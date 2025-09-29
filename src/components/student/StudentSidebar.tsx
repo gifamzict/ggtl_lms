@@ -13,18 +13,6 @@ const navigationItems = [{
   title: "Enrolled Courses",
   url: "/student/courses",
   icon: BookOpen
-}, {
-  title: "Orders",
-  url: "/student/orders",
-  icon: ShoppingCart
-}, {
-  title: "Reviews",
-  url: "/student/reviews",
-  icon: MessageSquare
-}, {
-  title: "Settings",
-  url: "/student/settings",
-  icon: Settings
 }];
 export function StudentSidebar() {
   const {
@@ -55,31 +43,33 @@ export function StudentSidebar() {
   }: {
     isActive: boolean;
   }) => isActive ? "bg-primary text-primary-foreground font-medium" : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground";
-  return <Sidebar className={state === "collapsed" ? "w-14" : "w-60"} collapsible="icon">
-      <SidebarTrigger className="m-2 self-end" />
+  return <Sidebar className={ state === "collapsed" ? "w-14" : "w-60" } collapsible = "icon" >
+    <SidebarTrigger className="m-2 self-end" />
 
-      <SidebarContent className="bg-gray-600">
+      <SidebarContent className="bg-gray-600" >
         <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {navigationItems.map(item => <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavClassName}>
-                      <item.icon className="mr-2 h-4 w-4 bg-zinc-600" />
-                      {state !== "collapsed" && <span className="text-slate-50">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>)}
-              
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={handleSignOut} className="text-sidebar-foreground hover:bg-destructive hover:text-destructive-foreground">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  {state !== "collapsed" && <span className="text-slate-50">Sign Out</span>}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-    </Sidebar>;
+        <SidebarGroupContent>
+        <SidebarMenu>
+        {
+          navigationItems.map(item => <SidebarMenuItem key={ item.title } >
+            <SidebarMenuButton asChild >
+            <NavLink to={ item.url } className = { getNavClassName } >
+            <item.icon className="mr-2 h-4 w-4 bg-zinc-600" />
+            { state !== "collapsed" && <span className="text-slate-50" > { item.title } </span>}
+        </NavLink>
+        </SidebarMenuButton>
+        </SidebarMenuItem>)
+}
+
+<SidebarMenuItem>
+  <SidebarMenuButton onClick={ handleSignOut } className = "text-sidebar-foreground hover:bg-destructive hover:text-destructive-foreground" >
+    <LogOut className="mr-2 h-4 w-4" />
+      { state !== "collapsed" && <span className="text-slate-50" > Sign Out </span>}
+</SidebarMenuButton>
+  </SidebarMenuItem>
+  </SidebarMenu>
+  </SidebarGroupContent>
+  </SidebarGroup>
+  </SidebarContent>
+  </Sidebar>;
 }

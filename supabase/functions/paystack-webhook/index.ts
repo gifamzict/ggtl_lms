@@ -1,3 +1,5 @@
+/// <reference types="https://deno.land/x/deno/cli/types/v1.42.1/deno.d.ts" />
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -10,7 +12,7 @@ const corsHeaders = {
 async function decryptText(encryptedText: string, key: string): Promise<string> {
   const data = new Uint8Array(atob(encryptedText).split('').map(c => c.charCodeAt(0)));
   const keyData = new TextEncoder().encode(key.padEnd(32, '0').slice(0, 32));
-  
+
   const cryptoKey = await crypto.subtle.importKey(
     'raw',
     keyData,
@@ -18,16 +20,16 @@ async function decryptText(encryptedText: string, key: string): Promise<string> 
     false,
     ['decrypt']
   );
-  
+
   const iv = data.slice(0, 12);
   const encrypted = data.slice(12);
-  
+
   const decrypted = await crypto.subtle.decrypt(
     { name: 'AES-GCM', iv },
     cryptoKey,
     encrypted
   );
-  
+
   return new TextDecoder().decode(decrypted);
 }
 
@@ -36,7 +38,7 @@ async function verifyPaystackSignature(body: string, signature: string, secret: 
   const encoder = new TextEncoder();
   const keyData = encoder.encode(secret);
   const dataToSign = encoder.encode(body);
-  
+
   const cryptoKey = await crypto.subtle.importKey(
     'raw',
     keyData,
@@ -44,16 +46,16 @@ async function verifyPaystackSignature(body: string, signature: string, secret: 
     false,
     ['sign']
   );
-  
+
   const signatureBuffer = await crypto.subtle.sign('HMAC', cryptoKey, dataToSign);
   const computedSignature = Array.from(new Uint8Array(signatureBuffer))
     .map(b => b.toString(16).padStart(2, '0'))
     .join('');
-  
+
   return computedSignature === signature;
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -68,7 +70,7 @@ serve(async (req) => {
     if (req.method === "POST") {
       const body = await req.text();
       const signature = req.headers.get('x-paystack-signature');
-      
+
       if (!signature) {
         throw new Error("No signature provided");
       }
@@ -102,7 +104,7 @@ serve(async (req) => {
       if (event.event === 'charge.success') {
         const { data } = event;
         const metadata = data.metadata;
-        
+
         if (!metadata?.course_id || !metadata?.user_id) {
           console.error("Missing metadata in webhook");
           return new Response("Missing metadata", { status: 400 });
@@ -116,7 +118,7 @@ serve(async (req) => {
         });
 
         const verifyData = await verifyResponse.json();
-        
+
         if (!verifyResponse.ok || !verifyData.status || verifyData.data.status !== 'success') {
           console.error("Transaction verification failed");
           return new Response("Transaction verification failed", { status: 400 });

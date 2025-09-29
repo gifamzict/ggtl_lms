@@ -1,15 +1,20 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
-  BarChart, 
   Bar, 
-  LineChart, 
-  Line, 
+  BarChart,
+  ComposedChart,
+  CartesianGrid, 
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip, 
   XAxis, 
   YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  ComposedChart
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
 } from "recharts";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminHeader } from "@/components/admin/AdminHeader";
@@ -17,45 +22,8 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DollarSign, ShoppingCart, BookOpen, Users, CheckCircle, XCircle } from "lucide-react";
 import { useAdminStats } from "@/hooks/useAdminStats";
-
-const chartData = [
-  { month: "Jan", orderAmount: 0, orderCount: 0 },
-  { month: "Feb", orderAmount: 0, orderCount: 0 },
-  { month: "Mar", orderAmount: 0, orderCount: 0 },
-  { month: "Apr", orderAmount: 0, orderCount: 0 },
-  { month: "May", orderAmount: 100000, orderCount: 4 },
-  { month: "Jun", orderAmount: 0, orderCount: 0 },
-  { month: "Jul", orderAmount: 0, orderCount: 0 },
-  { month: "Aug", orderAmount: 0, orderCount: 0 },
-  { month: "Sep", orderAmount: 0, orderCount: 0 },
-  { month: "Oct", orderAmount: 0, orderCount: 0 },
-  { month: "Nov", orderAmount: 0, orderCount: 0 },
-  { month: "Dec", orderAmount: 0, orderCount: 0 },
-];
-
-const recentCourses = [
-  { title: "Intro to Flutter", status: "Approved" },
-  { title: "E-commerce Strategies for Small Business...", status: "Approved" },
-  { title: "Songwriting Basics: Crafting Melodies", status: "Approved" },
-  { title: "Introduction to Financial Markets", status: "Approved" },
-  { title: "Remote Work Productivity: Tips and Tools", status: "Approved" },
-];
-
-const recentBlogs = [
-  { title: "Innovative Strategies for Engaging Students", status: "Active" },
-  { title: "Understanding Educational Psychology", status: "Active" },
-  { title: "Parental Involvement: Building Strong Home", status: "Active" },
-  { title: "Effective Evaluation Techniques for Teachers", status: "Active" },
-  { title: "Promoting Health and Wellbeing in Schools", status: "Active" },
-];
-
-const recentOrders = [
-  { invoice: "#6818c509990f5", user: "Adeshile Oluwaseyi Samson", amount: "303 NGN" },
-  { invoice: "#6818c3f7d7a78", user: "Adeshile Oluwaseyi Samson", amount: "100000 NGN" },
-  { invoice: "#6818c2d7b4f9c", user: "Jhon Deo", amount: "0 NGN" },
-  { invoice: "#6818c2d6e6d32", user: "Jhon Deo", amount: "108 NGN" },
-  { invoice: "#673858371360", user: "Jhon Deo", amount: "124 USD" },
-];
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface StatCardProps {
   title: string;
@@ -80,8 +48,169 @@ const StatCard = ({ title, value, icon, currency }: StatCardProps) => (
   </Card>
 );
 
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF'];
+
 export default function AdminDashboard() {
   const { stats, loading: statsLoading, error } = useAdminStats();
+  const [recentCourses, setRecentCourses] = useState<any[]>([]);
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [categoryChartData, setCategoryChartData] = useState<any[]>([]);
+  const [topCoursesData, setTopCoursesData] = useState<any[]>([]);
+  const [newUserChartData, setNewUserChartData] = useState<any[]>([]);
+  const [priceDistributionData, setPriceDistributionData] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        // Fetch recent courses
+        const { data: coursesData, error: coursesError } = await supabase
+          .from('courses')
+          .select('title, status, categories(name)')
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (coursesError) throw coursesError;
+        setRecentCourses(coursesData);
+
+        // Fetch recent orders
+        const { data: ordersData, error: ordersError } = await supabase
+          .from('enrollments')
+          .select(`
+            id,
+            courses ( price ),
+            profiles ( full_name )
+          `)
+          .order('enrolled_at', { ascending: false })
+          .limit(5);
+
+        if (ordersError) throw ordersError;
+        setRecentOrders(ordersData);
+
+        // Fetch chart data
+        const today = new Date();
+        const twelveMonthsAgo = new Date(new Date().setMonth(today.getMonth() - 12));
+
+        const { data: monthlyData, error: monthlyError } = await supabase
+          .from('enrollments')
+          .select('enrolled_at, courses(price)')
+          .gte('enrolled_at', twelveMonthsAgo.toISOString());
+
+        if (monthlyError) throw monthlyError;
+
+        const months = Array.from({ length: 12 }, (_, i) => {
+          const date = new Date();
+          date.setMonth(date.getMonth() - i);
+          return {
+            month: date.toLocaleString('default', { month: 'short' }),
+            year: date.getFullYear(),
+            orderAmount: 0,
+            orderCount: 0,
+          };
+        }).reverse();
+
+        monthlyData.forEach((enrollment: any) => {
+          const month = new Date(enrollment.enrolled_at).toLocaleString('default', { month: 'short' });
+          const year = new Date(enrollment.enrolled_at).getFullYear();
+          const monthData = months.find(m => m.month === month && m.year === year);
+          if (monthData) {
+            monthData.orderAmount += enrollment.courses.price;
+            monthData.orderCount += 1;
+          }
+        });
+        
+        setChartData(months);
+
+        // Fetch category data for pie chart
+        const { data: categoryData, error: categoryError } = await supabase
+          .from('courses')
+          .select('categories(name)');
+
+        if (categoryError) throw categoryError;
+
+        const categoryCounts = categoryData.reduce((acc, course) => {
+          const categoryName = course.categories?.name || 'Uncategorized';
+          acc[categoryName] = (acc[categoryName] || 0) + 1;
+          return acc;
+        }, {});
+
+        const pieChartData = Object.keys(categoryCounts).map(key => ({
+          name: key,
+          value: categoryCounts[key],
+        }));
+
+        setCategoryChartData(pieChartData);
+
+        // Fetch top courses data
+        const { data: topCourses, error: topCoursesError } = await supabase.rpc('get_top_courses');
+
+        if (topCoursesError) throw topCoursesError;
+        setTopCoursesData(topCourses);
+
+        // Fetch new user data
+        const { data: usersData, error: usersError } = await supabase
+          .from('profiles')
+          .select('created_at')
+          .gte('created_at', twelveMonthsAgo.toISOString());
+
+        if (usersError) throw usersError;
+
+        const userMonths = Array.from({ length: 12 }, (_, i) => {
+          const date = new Date();
+          date.setMonth(date.getMonth() - i);
+          return {
+            month: date.toLocaleString('default', { month: 'short' }),
+            year: date.getFullYear(),
+            userCount: 0,
+          };
+        }).reverse();
+
+        usersData.forEach((user: any) => {
+          const month = new Date(user.created_at).toLocaleString('default', { month: 'short' });
+          const year = new Date(user.created_at).getFullYear();
+          const monthData = userMonths.find(m => m.month === month && m.year === year);
+          if (monthData) {
+            monthData.userCount += 1;
+          }
+        });
+
+        setNewUserChartData(userMonths);
+
+        // Fetch price distribution data
+        const { data: pricesData, error: pricesError } = await supabase
+          .from('courses')
+          .select('price');
+
+        if (pricesError) throw pricesError;
+
+        const prices = pricesData.map(p => p.price);
+        const maxPrice = Math.max(...prices);
+        const binSize = 10000;
+        const bins = Array.from({ length: Math.ceil(maxPrice / binSize) }, (_, i) => {
+          const binStart = i * binSize;
+          const binEnd = binStart + binSize;
+          return {
+            name: `₦${binStart.toLocaleString()}-₦${binEnd.toLocaleString()}`,
+            count: 0,
+          };
+        });
+
+        prices.forEach(price => {
+          const binIndex = Math.floor(price / binSize);
+          if (bins[binIndex]) {
+            bins[binIndex].count++;
+          }
+        });
+
+        setPriceDistributionData(bins);
+
+      } catch (error) {
+        toast.error('Failed to fetch dashboard data.');
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
   return (
     <SidebarProvider>
@@ -193,7 +322,7 @@ export default function AdminDashboard() {
                       tickLine={false}
                       className="text-muted-foreground"
                       tick={{ fontSize: 12 }}
-                      domain={[0, 120000]}
+                      domain={[0, 'dataMax + 20000']}
                     />
                     <YAxis 
                       yAxisId="right" 
@@ -202,7 +331,7 @@ export default function AdminDashboard() {
                       tickLine={false}
                       className="text-muted-foreground"
                       tick={{ fontSize: 12 }}
-                      domain={[0, 4.5]}
+                      domain={[0, 'dataMax + 5']}
                     />
                     <Tooltip 
                       contentStyle={{
@@ -234,8 +363,62 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
 
-          {/* Recent Items Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            {/* Course Categories Pie Chart */}
+            <Card className="lg:col-span-1">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold text-foreground">Course Categories</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={categoryChartData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                        nameKey="name"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {categoryChartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Top 5 Courses Bar Chart */}
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold text-foreground">Top 5 Enrolled Courses</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={topCoursesData} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis type="number" />
+                      <YAxis dataKey="title" type="category" width={150} />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="enrollment_count" fill="#8884d8" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Recent Courses */}
             <Card>
               <CardHeader>
@@ -252,33 +435,8 @@ export default function AdminDashboard() {
                       <span className="text-sm text-primary hover:underline cursor-pointer">
                         {course.title}
                       </span>
-                      <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 text-xs rounded-full">
+                      <span className={`px-2 py-1 text-xs rounded-full ${course.status === 'PUBLISHED' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' : course.status === 'DRAFT' ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100' : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100'}`}>
                         {course.status}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Recent Blogs */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold text-foreground">Recent Blogs</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between text-sm font-medium text-muted-foreground border-b pb-2">
-                    <span>TITLE</span>
-                    <span>STATUS</span>
-                  </div>
-                  {recentBlogs.map((blog, index) => (
-                    <div key={index} className="flex justify-between items-center">
-                      <span className="text-sm text-primary hover:underline cursor-pointer">
-                        {blog.title}
-                      </span>
-                      <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 text-xs rounded-full">
-                        {blog.status}
                       </span>
                     </div>
                   ))}
@@ -301,16 +459,58 @@ export default function AdminDashboard() {
                   {recentOrders.map((order, index) => (
                     <div key={index} className="grid grid-cols-3 text-sm">
                       <span className="text-primary hover:underline cursor-pointer">
-                        {order.invoice}
+                        {order.id.slice(0, 8)}
                       </span>
-                      <span className="text-foreground">{order.user}</span>
-                      <span className="text-foreground">{order.amount}</span>
+                      <span className="text-foreground">{order.profiles.full_name}</span>
+                      <span className="text-foreground">₦{order.courses.price.toLocaleString()}</span>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
           </div>
+
+          {/* New User Growth Chart */}
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-foreground">New User Growth</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={newUserChartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="userCount" stroke="#8884d8" activeDot={{ r: 8 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Course Price Distribution Histogram */}
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-foreground">Course Price Distribution</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={priceDistributionData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="count" fill="#82ca9d" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
         </main>
       </div>
     </SidebarProvider>

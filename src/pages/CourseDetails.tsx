@@ -6,13 +6,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { 
-  BookOpen, 
-  Clock, 
-  Users, 
-  Star, 
-  Play, 
-  ChevronDown, 
+import {
+  BookOpen,
+  Clock,
+  Users,
+  Star,
+  Play,
+  ChevronDown,
   Check,
   Download,
   Smartphone,
@@ -23,6 +23,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/authStore';
+import { useCartStore } from './cartStore';
 import { toast } from 'sonner';
 
 interface Course {
@@ -67,6 +68,7 @@ const CourseDetails = () => {
   const { user, isStudent } = useAuth();
   const { openAuthModal } = useAuthStore();
   const [course, setCourse] = useState<Course | null>(null);
+  const { addToCart, items: cartItems } = useCartStore();
   const [sections, setSections] = useState<CourseSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState(false);
@@ -77,9 +79,6 @@ const CourseDetails = () => {
   useEffect(() => {
     if (slug) {
       fetchCourseDetails();
-      if (user) {
-        checkEnrollmentStatus();
-      }
     }
   }, [slug, user]);
 
@@ -97,23 +96,13 @@ const CourseDetails = () => {
         .single();
 
       if (courseError) throw courseError;
-      
+
       // Debug: Log the complete course data to see what fields are available
       console.log('Course data fetched:', courseData);
-      
+
       setCourse(courseData);
 
-      // Check if user is enrolled (only if user is logged in)
-      if (user) {
-        const { data: enrollmentData } = await supabase
-          .from('enrollments')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('course_id', courseData.id)
-          .single();
-        
-        setIsEnrolled(!!enrollmentData);
-      }
+      await checkEnrollmentStatus(courseData.id);
 
       // Fetch lessons grouped by sections (simplified for now)
       const { data: lessonsData, error: lessonsError } = await supabase
@@ -150,18 +139,18 @@ const CourseDetails = () => {
     }
   };
 
-  const checkEnrollmentStatus = async () => {
-    if (!user || !course) return;
+  const checkEnrollmentStatus = async (courseId: string) => {
+    if (!user) return;
 
     try {
       const { data, error } = await supabase
         .from('enrollments')
         .select('id')
         .eq('user_id', user.id)
-        .eq('course_id', course.id)
+        .eq('course_id', courseId)
         .single();
 
-      if (!error && data) {
+      if (data && !error) {
         setIsEnrolled(true);
       }
     } catch (error) {
@@ -178,7 +167,7 @@ const CourseDetails = () => {
     if (!course) return;
 
     setEnrolling(true);
-    
+
     try {
       if (course.price > 0) {
         // Handle paid course with Paystack
@@ -228,6 +217,17 @@ const CourseDetails = () => {
     setExpandedSections(newExpanded);
   };
 
+  const handleAddToCart = () => {
+    if (!course) return;
+    addToCart({
+      id: course.id,
+      title: course.title,
+      price: course.price,
+      thumbnail_url: course.thumbnail_url,
+      slug: course.slug,
+    });
+  };
+
   const formatDuration = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -262,6 +262,7 @@ const CourseDetails = () => {
 
   const isFree = course.price === 0;
   const originalPrice = course.price * 1.5; // Mock original price for discount display
+  const isInCart = cartItems.some(item => item.id === course.id);
 
   return (
     <div className="min-h-screen bg-background">
@@ -286,37 +287,15 @@ const CourseDetails = () => {
             <div>
               <h1 className="text-4xl font-bold mb-4">{course.title}</h1>
               <p className="text-xl text-muted-foreground mb-6">{course.description}</p>
-              
-              <div className="flex items-center gap-4 mb-6">
-                <Badge variant="secondary" className="bg-yellow-600 text-white">
-                  Bestseller
-                </Badge>
-                <div className="flex items-center gap-1">
-                  <span className="text-yellow-500 font-bold">4.7</span>
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-yellow-500 text-yellow-500" />
-                    ))}
-                  </div>
-                  <span className="text-muted-foreground">(447,965 ratings)</span>
-                  <span className="text-muted-foreground">1,482,701 students</span>
-                </div>
-              </div>
+
+
 
               <div className="flex items-center gap-4 mb-6">
                 <span className="text-muted-foreground">Created by</span>
                 <span className="text-primary font-medium">{course.profiles?.full_name || 'Instructor'}</span>
               </div>
 
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  <span>Last updated 02/2025</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span>English</span>
-                </div>
-              </div>
+
             </div>
 
             {/* Course Preview / Demo Video */}
@@ -327,8 +306,8 @@ const CourseDetails = () => {
                     previewLesson.video_url.includes('drive.google.com') ? (
                       <div className="video-container relative w-full h-full overflow-hidden rounded-lg">
                         <iframe
-                          src={previewLesson.video_url.includes('/preview') ? 
-                            previewLesson.video_url : 
+                          src={previewLesson.video_url.includes('/preview') ?
+                            previewLesson.video_url :
                             previewLesson.video_url.replace('/view', '/preview')
                           }
                           width="100%"
@@ -356,8 +335,8 @@ const CourseDetails = () => {
                     )
                   ) : course.thumbnail_url ? (
                     <div className="relative w-full h-full">
-                      <img 
-                        src={course.thumbnail_url} 
+                      <img
+                        src={course.thumbnail_url}
                         alt={course.title}
                         className="w-full h-full object-cover"
                       />
@@ -409,7 +388,7 @@ const CourseDetails = () => {
                         </div>
                         <ChevronDown className={`w-5 h-5 transition-transform ${expandedSections.has(section.id) ? 'rotate-180' : ''}`} />
                       </button>
-                      
+
                       {expandedSections.has(section.id) && (
                         <div className="border-t">
                           {section.lessons.map((lesson) => (
@@ -439,22 +418,10 @@ const CourseDetails = () => {
             <Card>
               <CardContent className="p-6">
                 <h2 className="text-2xl font-bold mb-4">Description</h2>
-                <div className="prose prose-sm max-w-none">
-                  <p>
-                    Welcome to the Complete Web Development Bootcamp, <strong>the only course you need</strong> to learn to code and 
-                    become a full-stack web developer. With 150,000+ ratings and a 4.8 average, my Web Development course is 
-                    one of the <strong>HIGHEST RATED</strong> courses in the history of Udemy!
-                  </p>
-                  <p>
-                    At 62+ hours, this Web Development course is without a doubt the <strong>most comprehensive</strong> web development 
-                    course available online. Even if you have <strong>zero</strong> programming experience, this course will take you from 
-                    <strong>beginner to mastery</strong>. Here's why:
-                  </p>
-                  <ul>
-                    <li>The course is taught by the <strong>lead instructor</strong> at the App Brewery, London's <strong>leading in-person programming bootcamp</strong>.</li>
-                    <li>The course has been updated to be <strong>2024 ready</strong> and you'll be learning the latest tools and technologies used at large companies such as Apple, Google and Netflix.</li>
-                  </ul>
-                </div>
+                <div 
+                  className="prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: course.description }}
+                />
               </CardContent>
             </Card>
           </div>
@@ -470,39 +437,42 @@ const CourseDetails = () => {
                     ) : (
                       <>
                         <span className="text-3xl font-bold">₦{course.price.toLocaleString()}</span>
-                        <span className="text-lg line-through text-muted-foreground">₦{originalPrice.toLocaleString()}</span>
-                        <Badge variant="destructive" className="ml-2">85% off</Badge>
                       </>
                     )}
                   </div>
-                  {!isFree && (
-                    <p className="text-sm text-destructive flex items-center justify-center gap-1">
-                      <Clock className="w-4 h-4" />
-                      1 day left at this price!
-                    </p>
-                  )}
+
                 </div>
 
                 <div className="space-y-3 mb-6">
                   {isEnrolled ? (
-                    <Button 
-                      className="w-full" 
+                    <Button
+                      className="w-full"
                       onClick={() => navigate(`/learn/${course.slug}`)}
                     >
                       Continue Learning
                     </Button>
                   ) : (
                     <>
-                      <Button 
-                        className="w-full" 
-                        onClick={handleEnrollment}
-                        disabled={enrolling || (!isFree && course.price > 0)}
+                      <Button
+                        className="w-full"
+                        onClick={isFree ? handleEnrollment : handleAddToCart}
+                        disabled={enrolling || isInCart}
                       >
-                        {enrolling ? 'Enrolling...' : isFree ? 'Enroll Now for Free' : 'Add to cart'}
+                        {enrolling
+                          ? 'Enrolling...'
+                          : isFree
+                            ? 'Enroll Now for Free'
+                            : isInCart
+                              ? 'Added to Cart'
+                              : 'Add to cart'}
                       </Button>
                       {!isFree && (
-                        <Button variant="outline" className="w-full" disabled>
-                          Buy now
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={handleEnrollment}
+                          disabled={enrolling}>
+                          {enrolling ? 'Processing...' : 'Buy now'}
                         </Button>
                       )}
                     </>
@@ -518,29 +488,7 @@ const CourseDetails = () => {
 
                 <Separator className="my-4" />
 
-                <div className="space-y-3 text-sm">
-                  <h3 className="font-medium">This course includes:</h3>
-                  <div className="flex items-center gap-2">
-                    <VideoIcon className="w-4 h-4" />
-                    <span>61 hours on-demand video</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Download className="w-4 h-4" />
-                    <span>194 downloadable resources</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4" />
-                    <span>7 coding exercises</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Smartphone className="w-4 h-4" />
-                    <span>Access on mobile and TV</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Award className="w-4 h-4" />
-                    <span>Certificate of completion</span>
-                  </div>
-                </div>
+
               </CardContent>
             </Card>
           </div>

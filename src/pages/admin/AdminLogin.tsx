@@ -74,7 +74,7 @@ export default function AdminLogin() {
               Sign in to access the administration panel
             </p>
           </CardHeader>
-          
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
@@ -90,7 +90,7 @@ export default function AdminLogin() {
                   className="h-11"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
@@ -135,7 +135,7 @@ export default function AdminLogin() {
               </motion.div>
             </form>
 
-            <div className="mt-6 space-y-3 text-center">
+            {/* <div className="mt-6 space-y-3 text-center">
               <Button
                 variant="link"
                 onClick={() => navigate('/admin/signup')}
@@ -151,7 +151,7 @@ export default function AdminLogin() {
               >
                 ← Back to main site
               </Button>
-            </div>
+            </div> */}
           </CardContent>
         </Card>
       </motion.div>

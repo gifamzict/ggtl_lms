@@ -64,7 +64,7 @@ export default function StudentCourses() {
         // Create a set of enrolled course IDs and progress map
         const enrolledIds = new Set<string>();
         const progressMap = new Map<string, number>();
-        
+
         (enrollments || []).forEach((enrollment: any) => {
           enrolledIds.add(enrollment.course_id);
           progressMap.set(enrollment.course_id, enrollment.progress_percentage || 0);
@@ -98,7 +98,7 @@ export default function StudentCourses() {
     }
 
     setEnrollingCourseId(courseId);
-    
+
     try {
       if (!isFree) {
         // Handle paid course with Paystack
@@ -133,13 +133,13 @@ export default function StudentCourses() {
         }
 
         // Update local state
-        setCourses(prev => prev.map(course => 
-          course.id === courseId 
+        setCourses(prev => prev.map(course =>
+          course.id === courseId
             ? { ...course, isEnrolled: true, progress: 0 }
             : course
         ));
         setEnrolledCourseIds(prev => new Set([...prev, courseId]));
-        
+
         toast.success('Successfully enrolled in course!');
       }
     } catch (error) {
@@ -165,7 +165,7 @@ export default function StudentCourses() {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gray-50">
         <StudentSidebar />
-        
+
         <div className="flex-1">
           {/* Header */}
           <div className="bg-white border-b p-6">
@@ -189,8 +189,8 @@ export default function StudentCourses() {
                   {courses.filter(course => course.isEnrolled).map((course) => (
                     <Card key={course.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                       <div className="relative">
-                        <img 
-                          src={course.thumbnail_url || "/lovable-uploads/bd0b0eb0-6cfd-4fc4-81b8-d4b8002811c9.png"} 
+                        <img
+                          src={course.thumbnail_url || "/lovable-uploads/bd0b0eb0-6cfd-4fc4-81b8-d4b8002811c9.png"}
                           alt={course.title}
                           className="w-full h-48 object-cover"
                         />
@@ -201,7 +201,7 @@ export default function StudentCourses() {
                       <CardContent className="p-6">
                         <h3 className="font-semibold text-lg mb-2 line-clamp-2">{course.title}</h3>
                         <p className="text-gray-600 text-sm mb-4 line-clamp-2">{course.description}</p>
-                        
+
                         <div className="mb-4">
                           <div className="flex justify-between text-sm text-gray-600 mb-1">
                             <span>Progress</span>
@@ -221,7 +221,7 @@ export default function StudentCourses() {
                           </div>
                         </div>
 
-                        <Button 
+                        <Button
                           className="w-full"
                           onClick={() => window.location.href = `/learn/${course.slug || course.id}`}
                         >
@@ -238,7 +238,7 @@ export default function StudentCourses() {
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No Enrolled Courses</h3>
                   <p className="text-gray-600">Start learning by enrolling in courses below</p>
                 </div>
-              )}
+              )}:
             </div>
 
             {/* Available Courses Section */}
@@ -248,21 +248,21 @@ export default function StudentCourses() {
                 {courses.filter(course => !course.isEnrolled).map((course) => (
                   <Card key={course.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                     <div className="relative">
-                      <img 
-                        src={course.thumbnail_url || "/lovable-uploads/bd0b0eb0-6cfd-4fc4-81b8-d4b8002811c9.png"} 
+                      <img
+                        src={course.thumbnail_url || "/lovable-uploads/bd0b0eb0-6cfd-4fc4-81b8-d4b8002811c9.png"}
                         alt={course.title}
                         className="w-full h-48 object-cover"
                       />
                       <div className="absolute top-4 left-4">
                         <Badge variant={course.price === 0 ? "secondary" : "default"}>
-                          {course.price === 0 ? "Free" : `$${course.price}`}
+                          {course.price === 0 ? "Free" : `₦${course.price}`}
                         </Badge>
                       </div>
                     </div>
                     <CardContent className="p-6">
                       <h3 className="font-semibold text-lg mb-2 line-clamp-2">{course.title}</h3>
                       <p className="text-gray-600 text-sm mb-4 line-clamp-2">{course.description}</p>
-                      
+
                       <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
                         <div className="flex items-center gap-1">
                           <BookOpen className="h-4 w-4" />
@@ -274,14 +274,14 @@ export default function StudentCourses() {
                         </div>
                       </div>
 
-                      <Button 
-                        className="w-full" 
+                      <Button
+                        className="w-full"
                         onClick={() => handleEnroll(course.id, course.price === 0)}
                         disabled={enrollingCourseId === course.id}
                       >
                         {enrollingCourseId === course.id ? 'Enrolling...' : 'Enroll Now'}
                       </Button>
-                    </CardContent>
+                    </CardContent>``
                   </Card>
                 ))}
               </div>

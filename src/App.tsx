@@ -10,7 +10,7 @@ import Footer from '@/components/layout/Footer';
 import { useLocation } from 'react-router-dom';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { ThemeProvider } from './components/ThemeProvider';
-import Index from "./pages/Index";
+import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth";
 import AboutUs from "./pages/AboutUs";
 import ContactUs from "./pages/ContactUs";
@@ -34,6 +34,8 @@ import AuthCallback from "./pages/AuthCallback";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import AdminTest from "./pages/AdminTest";
 import AdminDirectAccess from "./pages/AdminDirectAccess";
+import Cart from "./pages/Cart";
+import AdminOrders from "./pages/admin/AdminOrders";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +51,7 @@ const AppContent = () => {
                   <Route path="/" element={<Index />} />
                   <Route path="/courses" element={<Courses />} />
                   <Route path="/courses/:slug" element={<CourseDetails />} />
+                  <Route path="/cart" element={<Cart />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/about-us" element={<AboutUs />} />
                   <Route path="/contact-us" element={<ContactUs />} />
@@ -75,6 +78,7 @@ const AppContent = () => {
                         <Route path="students" element={<Students />} />
                         <Route path="payment-settings" element={<PaymentSettings />} />
                         <Route path="profile" element={<AdminProfile />} />
+                        <Route path="orders" element={<AdminOrders />} />
                       </Routes>
                     </AdminAuthGuard>
                   } />
