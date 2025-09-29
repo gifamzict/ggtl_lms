@@ -46,7 +46,7 @@ export function AdminAuthGuard({ children }: AdminAuthGuardProps) {
     const redirectTo = location.pathname + location.search;
     return (
       <Navigate 
-        to={`/admin/login?redirect=${encodeURIComponent(redirectTo)}`} 
+        to={`/management-portal/login?redirect=${encodeURIComponent(redirectTo)}`} 
         replace 
       />
     );

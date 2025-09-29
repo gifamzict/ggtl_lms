@@ -37,10 +37,10 @@ export default function AdminTest() {
           </div>
 
           <div className="space-x-4">
-            <Button onClick={() => navigate('/admin/login')}>
+            <Button onClick={() => navigate('/management-portal/login')}>
               Go to Admin Login
             </Button>
-            <Button onClick={() => navigate('/admin')}>
+            <Button onClick={() => navigate('/management-portal')}>
               Go to Admin Dashboard
             </Button>
             <Button onClick={() => navigate('/')}>

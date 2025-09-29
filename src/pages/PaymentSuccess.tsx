@@ -27,8 +27,8 @@ const PaymentSuccess = () => {
     const POLLING_INTERVAL = 2000; // 2 seconds
     const POLLING_TIMEOUT = 30000; // 30 seconds
 
-    let intervalId: number;
-    let timeoutId: number;
+    const intervalId: number = 0;
+    const timeoutId: number = 0;
 
     const cleanup = () => {
       clearInterval(intervalId);
@@ -64,10 +64,10 @@ const PaymentSuccess = () => {
 
     // Start polling
     poll(); // Initial immediate check
-    intervalId = setInterval(poll, POLLING_INTERVAL);
+    const newIntervalId = setInterval(poll, POLLING_INTERVAL);
 
     // Set a timeout for the entire polling process
-    timeoutId = setTimeout(() => {
+    const newTimeoutId = setTimeout(() => {
       setVerificationStatus(prevStatus => {
         if (prevStatus === 'verifying') {
           console.error("Polling timed out.");

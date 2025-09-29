@@ -66,13 +66,13 @@ export default function AdminDirectAccess() {
           </div>
 
           <div className="space-x-4">
-            <Button onClick={() => navigate('/admin/login')}>
+            <Button onClick={() => navigate('/management-portal/login')}>
               Go to Admin Login
             </Button>
-            <Button onClick={() => navigate('/admin')}>
+            <Button onClick={() => navigate('/management-portal')}>
               Try Admin Dashboard
             </Button>
-            <Button onClick={() => navigate('/admin-test')}>
+            <Button onClick={() => navigate('/management-portal/test')}>
               Go to Admin Test
             </Button>
           </div>

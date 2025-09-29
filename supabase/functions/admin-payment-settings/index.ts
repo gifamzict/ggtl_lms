@@ -58,6 +58,13 @@ async function decryptText(encryptedText: string, key: string): Promise<string> 
   return new TextDecoder().decode(decrypted);
 }
 
+interface UpdateData {
+    public_key: string;
+    is_active: boolean;
+    updated_at: string;
+    secret_key?: string;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -200,7 +207,7 @@ serve(async (req) => {
         encryptedSecretKey = existing?.secret_key;
       }
 
-      const updateData: any = {
+      const updateData: UpdateData = {
         public_key,
         is_active,
         updated_at: new Date().toISOString()

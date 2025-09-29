@@ -20,8 +20,8 @@ interface AuthContextType {
   userProfile: UserProfile | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string, role?: string) => Promise<{ error: any }>;
-  signIn: (email: string, password: string, roleFilter?: string[]) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string, role?: string) => Promise<{ error: Error | null }>;
+  signIn: (email: string, password: string, roleFilter?: string[]) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   isAdmin: () => boolean;
   isSuperAdmin: () => boolean;

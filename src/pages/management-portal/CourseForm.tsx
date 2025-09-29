@@ -23,13 +23,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { AdminSidebar } from "@/components/management-portal/AdminSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Plus, Trash2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+
+interface Category {
+  id: string;
+  name: string;
+}
 
 const lessonSchema = z.object({
   title: z.string().min(1, "Lesson title is required"),
@@ -134,7 +139,7 @@ export default function CourseForm() {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = Boolean(id);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const { user } = useAuth();
 
   const form = useForm<CourseFormData>({
@@ -391,9 +396,9 @@ export default function CourseForm() {
       
       // Add a small delay to ensure the user sees the success message
       setTimeout(() => {
-        navigate("/admin/courses");
+        navigate("/management-portal/courses");
       }, 1000);
-    } catch (error: any) {
+    } catch (error: Error) {
       console.error('Error saving course:', error);
       if (error?.message) {
         toast.error(`Failed to save course: ${error.message}`);
@@ -415,7 +420,7 @@ export default function CourseForm() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => navigate("/admin/courses")}
+                onClick={() => navigate("/management-portal/courses")}
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
@@ -791,7 +796,7 @@ export default function CourseForm() {
                 <Button 
                   type="button" 
                   variant="outline"
-                  onClick={() => navigate("/admin/courses")}
+                  onClick={() => navigate("/management-portal/courses")}
                 >
                   Cancel
                 </Button>

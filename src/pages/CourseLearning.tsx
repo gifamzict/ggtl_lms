@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ReactPlayer from 'react-player';
 import { Card, CardContent } from '@/components/ui/card';
@@ -63,13 +63,7 @@ const CourseLearning = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [watchedDuration, setWatchedDuration] = useState(0);
 
-  useEffect(() => {
-    if (slug && user) {
-      fetchCourseData();
-    }
-  }, [slug, user]);
-
-  const fetchCourseData = async () => {
+  const fetchCourseData = useCallback(async () => {
     try {
       // Fetch course details
       const { data: courseData, error: courseError } = await supabase
@@ -140,7 +134,13 @@ const CourseLearning = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [slug, user, navigate]);
+
+  useEffect(() => {
+    if (slug && user) {
+      fetchCourseData();
+    }
+  }, [slug, user, fetchCourseData]);
 
   const handleLessonSelect = (lesson: Lesson) => {
     setCurrentLesson(lesson);
@@ -224,7 +224,7 @@ const CourseLearning = () => {
 
   const getVideoUrl = (lesson: Lesson) => {
     switch (lesson.video_source) {
-      case 'DRIVE':
+      case 'DRIVE': {
         // Extract file ID from various Google Drive URL formats
         const url = lesson.video_url;
         let fileId = '';
@@ -247,6 +247,7 @@ const CourseLearning = () => {
         }
         
         return lesson.video_url;
+      }
       case 'UPLOAD':
         return lesson.video_url;
       default:

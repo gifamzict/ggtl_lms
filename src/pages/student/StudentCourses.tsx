@@ -25,6 +25,11 @@ interface Course {
   progress?: number;
 }
 
+interface Enrollment {
+  course_id: string;
+  progress_percentage: number;
+}
+
 export default function StudentCourses() {
   const { user, loading } = useAuth();
   const [courses, setCourses] = useState<Course[]>([]);
@@ -65,13 +70,13 @@ export default function StudentCourses() {
         const enrolledIds = new Set<string>();
         const progressMap = new Map<string, number>();
 
-        (enrollments || []).forEach((enrollment: any) => {
+        (enrollments as Enrollment[] || []).forEach((enrollment) => {
           enrolledIds.add(enrollment.course_id);
           progressMap.set(enrollment.course_id, enrollment.progress_percentage || 0);
         });
 
         // Add enrollment status and progress to courses
-        const coursesWithEnrollment = (coursesData || []).map((course: any) => ({
+        const coursesWithEnrollment = (coursesData as Course[] || []).map((course) => ({
           ...course,
           isEnrolled: enrolledIds.has(course.id),
           progress: progressMap.get(course.id) || 0
@@ -142,7 +147,7 @@ export default function StudentCourses() {
 
         toast.success('Successfully enrolled in course!');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error enrolling in course:', error);
       toast.error(error.message || 'Failed to enroll in course');
     } finally {

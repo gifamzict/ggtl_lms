@@ -19,7 +19,7 @@ export default function AdminLogin() {
   useEffect(() => {
     // Redirect if already authenticated as admin
     if (!authLoading && (isAdmin() || isSuperAdmin())) {
-      navigate('/admin');
+      navigate('/management-portal');
     }
   }, [authLoading, isAdmin, isSuperAdmin, navigate]);
 
@@ -31,8 +31,8 @@ export default function AdminLogin() {
       console.log('Attempting admin login with:', { email, roleFilter: ['ADMIN', 'SUPER_ADMIN'] });
       const { error } = await signIn(email, password, ['ADMIN', 'SUPER_ADMIN']);
       if (!error) {
-        console.log('Admin login successful, navigating to /admin');
-        navigate('/admin');
+        console.log('Admin login successful, navigating to /management-portal');
+        navigate('/management-portal');
       } else {
         console.error('Admin login failed:', error);
       }
@@ -138,7 +138,7 @@ export default function AdminLogin() {
             {/* <div className="mt-6 space-y-3 text-center">
               <Button
                 variant="link"
-                onClick={() => navigate('/admin/signup')}
+                onClick={() => navigate('/management-portal/signup')}
                 className="text-sm text-muted-foreground hover:text-primary block w-full"
               >
                 Create Initial Super Admin Account

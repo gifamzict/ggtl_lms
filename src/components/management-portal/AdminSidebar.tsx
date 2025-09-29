@@ -34,38 +34,38 @@ import {
 const menuItems = [
   {
     title: "Dashboard",
-    url: "/admin",
+    url: "/management-portal",
     icon: LayoutDashboard,
   },
   {
     title: "User Management",
     icon: UserCheck,
     items: [
-      { title: "Manage Admins", url: "/admin/manage-admins" },
-      { title: "Students", url: "/admin/students" },
+      { title: "Manage Admins", url: "/management-portal/manage-admins" },
+      { title: "Students", url: "/management-portal/students" },
     ],
   },
   {
     title: "Course Management",
     icon: BookOpen,
     items: [
-      { title: "Courses", url: "/admin/courses" },
-      { title: "Course Categories", url: "/admin/course-categories" },
+      { title: "Courses", url: "/management-portal/courses" },
+      { title: "Course Categories", url: "/management-portal/course-categories" },
     ],
   },
   {
     title: "Orders",
-    url: "/admin/orders",
+    url: "/management-portal/orders",
     icon: ShoppingCart,
   },
   {
     title: "Payment Settings",
-    url: "/admin/payment-settings",
+    url: "/management-portal/payment-settings",
     icon: Settings,
   },
   {
     title: "Profile",
-    url: "/admin/profile",
+    url: "/management-portal/profile",
     icon: Settings,
   },
 ];
@@ -84,8 +84,8 @@ export function AdminSidebar() {
   };
 
   const isActive = (path: string) => {
-    if (path === "/admin") {
-      return location.pathname === "/admin";
+    if (path === "/management-portal") {
+      return location.pathname === "/management-portal";
     }
     return location.pathname.startsWith(path);
   };

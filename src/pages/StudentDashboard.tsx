@@ -27,6 +27,21 @@ interface EnrolledCourse {
   isFree: boolean;
 }
 
+interface Enrollment {
+  id: string;
+  progress_percentage: number;
+  enrolled_at: string;
+  completed_at: string | null;
+  courses: {
+    id: string;
+    title: string;
+    thumbnail_url: string | null;
+    total_lessons: number;
+    price: number;
+    status: string;
+  } | null;
+}
+
 export default function StudentDashboard() {
   const { user } = useAuthStore();
   const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourse[]>([]);
@@ -71,16 +86,16 @@ export default function StudentDashboard() {
         }
 
         // Transform enrollments data
-        const coursesData: EnrolledCourse[] = (enrollments || []).map((enrollment: any) => ({
-          id: enrollment.courses.id,
-          title: enrollment.courses.title,
+        const coursesData: EnrolledCourse[] = (enrollments as Enrollment[] || []).map((enrollment) => ({
+          id: enrollment.courses!.id,
+          title: enrollment.courses!.title,
           instructor: "Admin", // Since admin creates all courses
           progress: enrollment.progress_percentage || 0,
-          thumbnail: enrollment.courses.thumbnail_url || "/lovable-uploads/bd0b0eb0-6cfd-4fc4-81b8-d4b8002811c9.png",
-          totalLessons: enrollment.courses.total_lessons || 0,
-          completedLessons: Math.floor((enrollment.progress_percentage || 0) * (enrollment.courses.total_lessons || 0) / 100),
-          price: enrollment.courses.price || 0,
-          isFree: (enrollment.courses.price || 0) === 0
+          thumbnail: enrollment.courses!.thumbnail_url || "/lovable-uploads/bd0b0eb0-6cfd-4fc4-81b8-d4b8002811c9.png",
+          totalLessons: enrollment.courses!.total_lessons || 0,
+          completedLessons: Math.floor((enrollment.progress_percentage || 0) * (enrollment.courses!.total_lessons || 0) / 100),
+          price: enrollment.courses!.price || 0,
+          isFree: (enrollment.courses!.price || 0) === 0
         }));
 
         setEnrolledCourses(coursesData);

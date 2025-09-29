@@ -30,8 +30,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Plus, MoreVertical, Edit, Trash2, Search } from "lucide-react";
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
-import { AdminHeader } from "@/components/admin/AdminHeader";
+import { AdminSidebar } from "@/components/management-portal/AdminSidebar";
+import { AdminHeader } from "@/components/management-portal/AdminHeader";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -151,7 +151,7 @@ export default function CoursesManagement() {
     }
   };
 
-  const columns: ColumnDef<Course, any>[] = [
+  const columns: ColumnDef<Course>[] = [
     columnHelper.accessor("title", {
       header: "Course Title",
       cell: (info) => (
@@ -205,7 +205,7 @@ export default function CoursesManagement() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-popover">
               <DropdownMenuItem 
-                onClick={() => navigate(`/admin/courses/edit/${row.original.id}`)}
+                onClick={() => navigate(`/management-portal/courses/edit/${row.original.id}`)}
               >
                 <Edit className="h-4 w-4 mr-2" />
                 Edit
@@ -249,7 +249,7 @@ export default function CoursesManagement() {
           <div className="flex justify-end mb-6">
             <Button 
               onClick={() => {
-                navigate("/admin/courses/new");
+                navigate("/management-portal/courses/new");
                 // Refresh courses when coming back
                 setTimeout(() => fetchCourses(), 100);
               }}

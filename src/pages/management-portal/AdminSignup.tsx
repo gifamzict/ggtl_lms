@@ -59,9 +59,9 @@ export default function AdminSignup() {
         }
 
         toast.success('Super Admin account created successfully! Please check your email to verify your account.');
-        navigate('/admin/login');
+        navigate('/management-portal/login');
       }
-    } catch (error: any) {
+    } catch (error: Error) {
       console.error('Signup error:', error);
       toast.error(error.message || 'Failed to create admin account');
     } finally {
@@ -207,7 +207,7 @@ export default function AdminSignup() {
             <div className="mt-6 text-center">
               <Button
                 variant="link"
-                onClick={() => navigate('/admin/login')}
+                onClick={() => navigate('/management-portal/login')}
                 className="text-sm text-muted-foreground hover:text-primary"
               >
                 ← Back to Admin Login

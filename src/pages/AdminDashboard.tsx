@@ -16,8 +16,8 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
-import { AdminHeader } from "@/components/admin/AdminHeader";
+import { AdminSidebar } from "@/components/management-portal/AdminSidebar";
+import { AdminHeader } from "@/components/management-portal/AdminHeader";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DollarSign, ShoppingCart, BookOpen, Users, CheckCircle, XCircle } from "lucide-react";
@@ -30,6 +30,63 @@ interface StatCardProps {
   value: string | number;
   icon: React.ReactNode;
   currency?: string;
+}
+
+interface RecentCourse {
+  title: string;
+  status: string;
+  categories: {
+    name: string;
+  } | null;
+}
+
+interface RecentOrder {
+  id: string;
+  courses: {
+    price: number;
+  } | null;
+  profiles: {
+    full_name: string;
+  } | null;
+}
+
+interface ChartData {
+  month: string;
+  year: number;
+  orderAmount: number;
+  orderCount: number;
+}
+
+interface CategoryChartData {
+  name: string;
+  value: number;
+}
+
+interface TopCourseData {
+  title: string;
+  enrollment_count: number;
+}
+
+interface NewUserChartData {
+  month: string;
+  year: number;
+  userCount: number;
+}
+
+interface PriceDistributionData {
+  name: string;
+  count: number;
+}
+
+interface MonthlyData {
+    enrolled_at: string;
+    courses: {
+        price: number;
+    }
+}
+
+interface UserData {
+    created_at: string;
 }
 
 const StatCard = ({ title, value, icon, currency }: StatCardProps) => (
@@ -52,13 +109,13 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF'];
 
 export default function AdminDashboard() {
   const { stats, loading: statsLoading, error } = useAdminStats();
-  const [recentCourses, setRecentCourses] = useState<any[]>([]);
-  const [recentOrders, setRecentOrders] = useState<any[]>([]);
-  const [chartData, setChartData] = useState<any[]>([]);
-  const [categoryChartData, setCategoryChartData] = useState<any[]>([]);
-  const [topCoursesData, setTopCoursesData] = useState<any[]>([]);
-  const [newUserChartData, setNewUserChartData] = useState<any[]>([]);
-  const [priceDistributionData, setPriceDistributionData] = useState<any[]>([]);
+  const [recentCourses, setRecentCourses] = useState<RecentCourse[]>([]);
+  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
+  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [categoryChartData, setCategoryChartData] = useState<CategoryChartData[]>([]);
+  const [topCoursesData, setTopCoursesData] = useState<TopCourseData[]>([]);
+  const [newUserChartData, setNewUserChartData] = useState<NewUserChartData[]>([]);
+  const [priceDistributionData, setPriceDistributionData] = useState<PriceDistributionData[]>([]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -71,7 +128,7 @@ export default function AdminDashboard() {
           .limit(5);
 
         if (coursesError) throw coursesError;
-        setRecentCourses(coursesData);
+        setRecentCourses(coursesData as RecentCourse[]);
 
         // Fetch recent orders
         const { data: ordersData, error: ordersError } = await supabase
@@ -85,7 +142,7 @@ export default function AdminDashboard() {
           .limit(5);
 
         if (ordersError) throw ordersError;
-        setRecentOrders(ordersData);
+        setRecentOrders(ordersData as RecentOrder[]);
 
         // Fetch chart data
         const today = new Date();
@@ -109,7 +166,7 @@ export default function AdminDashboard() {
           };
         }).reverse();
 
-        monthlyData.forEach((enrollment: any) => {
+        (monthlyData as MonthlyData[]).forEach((enrollment) => {
           const month = new Date(enrollment.enrolled_at).toLocaleString('default', { month: 'short' });
           const year = new Date(enrollment.enrolled_at).getFullYear();
           const monthData = months.find(m => m.month === month && m.year === year);
@@ -132,7 +189,7 @@ export default function AdminDashboard() {
           const categoryName = course.categories?.name || 'Uncategorized';
           acc[categoryName] = (acc[categoryName] || 0) + 1;
           return acc;
-        }, {});
+        }, {} as Record<string, number>);
 
         const pieChartData = Object.keys(categoryCounts).map(key => ({
           name: key,
@@ -145,7 +202,7 @@ export default function AdminDashboard() {
         const { data: topCourses, error: topCoursesError } = await supabase.rpc('get_top_courses');
 
         if (topCoursesError) throw topCoursesError;
-        setTopCoursesData(topCourses);
+        setTopCoursesData(topCourses as TopCourseData[]);
 
         // Fetch new user data
         const { data: usersData, error: usersError } = await supabase
@@ -165,7 +222,7 @@ export default function AdminDashboard() {
           };
         }).reverse();
 
-        usersData.forEach((user: any) => {
+        (usersData as UserData[]).forEach((user) => {
           const month = new Date(user.created_at).toLocaleString('default', { month: 'short' });
           const year = new Date(user.created_at).getFullYear();
           const monthData = userMonths.find(m => m.month === month && m.year === year);

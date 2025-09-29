@@ -8,7 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
-import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import { AdminSidebar } from '@/components/management-portal/AdminSidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 
 export default function AdminProfile() {

@@ -4,8 +4,8 @@ import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { AdminHeader } from '@/components/admin/AdminHeader';
-import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import { AdminHeader } from '@/components/management-portal/AdminHeader';
+import { AdminSidebar } from '@/components/management-portal/AdminSidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 
 interface Order {
@@ -14,6 +14,18 @@ interface Order {
     user_name: string;
     amount: number;
     enrolled_at: string;
+}
+
+interface FetchedOrder {
+    id: string;
+    enrolled_at: string;
+    courses: {
+        title: string;
+        price: number;
+    } | null;
+    profiles: {
+        full_name: string;
+    } | null;
 }
 
 const AdminOrders = () => {
@@ -37,16 +49,16 @@ const AdminOrders = () => {
                     throw error;
                 }
 
-                const formattedOrders: Order[] = data.map((order: any) => ({
+                const formattedOrders: Order[] = (data as FetchedOrder[]).map((order) => ({
                     id: order.id,
-                    course_title: order.courses.title,
-                    user_name: order.profiles.full_name,
-                    amount: order.courses.price,
+                    course_title: order.courses?.title || 'N/A',
+                    user_name: order.profiles?.full_name || 'N/A',
+                    amount: order.courses?.price || 0,
                     enrolled_at: new Date(order.enrolled_at).toLocaleDateString(),
                 }));
 
                 setOrders(formattedOrders);
-            } catch (error) {
+            } catch (error: any) {
                 toast.error(error.message || 'Failed to fetch orders.');
             } finally {
                 setLoading(false);
@@ -61,7 +73,7 @@ const AdminOrders = () => {
             <div className="flex min-h-screen">
                 <AdminSidebar />
                 <div className="flex-1">
-                    <AdminHeader />
+                    <AdminHeader title="Orders" />
                     <main className="p-6">
                         <Card>
                             <CardHeader>

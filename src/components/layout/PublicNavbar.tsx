@@ -224,7 +224,7 @@ export function PublicNavbar() {
                 <>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link to="/admin" className="flex items-center text-primary">
+                    <Link to="/management-portal" className="flex items-center text-primary">
                       <Shield className="mr-2 h-4 w-4" />
                       Admin Panel
                     </Link>
@@ -235,7 +235,7 @@ export function PublicNavbar() {
               {/* Debug Access - Remove in production */}
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link to="/admin-direct" className="flex items-center text-muted-foreground text-xs">
+                <Link to="/management-portal/direct" className="flex items-center text-muted-foreground text-xs">
                   🔧 Admin Debug
                 </Link>
               </DropdownMenuItem>

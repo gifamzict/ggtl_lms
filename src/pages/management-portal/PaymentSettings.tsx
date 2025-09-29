@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { AdminSidebar } from '@/components/admin/AdminSidebar';
-import { AdminHeader } from '@/components/admin/AdminHeader';
+import { AdminSidebar } from '@/components/management-portal/AdminSidebar';
+import { AdminHeader } from '@/components/management-portal/AdminHeader';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

@@ -15,15 +15,15 @@ import Auth from "./pages/Auth";
 import AboutUs from "./pages/AboutUs";
 import ContactUs from "./pages/ContactUs";
 import AdminDashboard from "./pages/AdminDashboard";
-import CoursesManagement from "./pages/admin/CoursesManagement";
-import CourseForm from "./pages/admin/CourseForm";
-import CourseCategories from "./pages/admin/CourseCategories";
-import AdminLogin from "./pages/admin/AdminLogin";
-import AdminSignup from "./pages/admin/AdminSignup";
-import ManageAdmins from "./pages/admin/ManageAdmins";
-import Students from "./pages/admin/Students";
-import AdminProfile from "./pages/admin/AdminProfile";
-import PaymentSettings from "./pages/admin/PaymentSettings";
+import CoursesManagement from "./pages/management-portal/CoursesManagement";
+import CourseForm from "./pages/management-portal/CourseForm";
+import CourseCategories from "./pages/management-portal/CourseCategories";
+import AdminLogin from "./pages/management-portal/AdminLogin";
+import AdminSignup from "./pages/management-portal/AdminSignup";
+import ManageAdmins from "./pages/management-portal/ManageAdmins";
+import Students from "./pages/management-portal/Students";
+import AdminProfile from "./pages/management-portal/AdminProfile";
+import PaymentSettings from "./pages/management-portal/PaymentSettings";
 import StudentDashboard from "./pages/student/StudentDashboard";
 import StudentCourses from "./pages/student/StudentCourses";
 import Courses from "./pages/Courses";
@@ -35,13 +35,13 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import AdminTest from "./pages/AdminTest";
 import AdminDirectAccess from "./pages/AdminDirectAccess";
 import Cart from "./pages/Cart";
-import AdminOrders from "./pages/admin/AdminOrders";
+import AdminOrders from "./pages/management-portal/AdminOrders";
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
   const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith('/admin');
+    const isAdminRoute = location.pathname.startsWith('/management-portal');
 
   return (
     <div className="min-h-screen bg-background">
@@ -59,13 +59,13 @@ const AppContent = () => {
                   <Route path="/payment/success" element={<PaymentSuccess />} />
                   
                   {/* Public Admin Login/Signup (not protected) */}
-                  <Route path="/admin/login" element={<AdminLogin />} />
-                  <Route path="/admin/signup" element={<AdminSignup />} />
-                  <Route path="/admin-test" element={<AdminTest />} />
-                  <Route path="/admin-direct" element={<AdminDirectAccess />} />
+                  <Route path="/management-portal/login" element={<AdminLogin />} />
+                  <Route path="/management-portal/signup" element={<AdminSignup />} />
+                  <Route path="/management-portal/test" element={<AdminTest />} />
+                  <Route path="/management-portal/direct" element={<AdminDirectAccess />} />
                   
                   {/* Protected Admin Routes */}
-                  <Route path="/admin/*" element={
+                  <Route path="/management-portal/*" element={
                     <AdminAuthGuard>
                       <Routes>
                         <Route path="/" element={<AdminDashboard />} />

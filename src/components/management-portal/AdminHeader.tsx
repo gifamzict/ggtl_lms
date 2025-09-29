@@ -30,7 +30,7 @@ export function AdminHeader({ title }: AdminHeaderProps) {
 
   const handleLogout = async () => {
     await signOut();
-    window.location.href = '/admin/login';
+    window.location.href = '/management-portal/login';
   };
 
   if (loading) {
@@ -54,7 +54,7 @@ export function AdminHeader({ title }: AdminHeaderProps) {
         
         {!user ? (
           <Button asChild>
-            <Link to="/admin/login">
+            <Link to="/management-portal/login">
               <User className="h-4 w-4 mr-2" />
               Login
             </Link>

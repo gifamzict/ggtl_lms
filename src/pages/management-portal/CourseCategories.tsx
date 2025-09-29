@@ -45,7 +45,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Plus, MoreVertical, Edit, Trash2, Search } from "lucide-react";
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { AdminSidebar } from "@/components/management-portal/AdminSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useForm } from "react-hook-form";
@@ -179,7 +179,7 @@ export default function CourseCategories() {
     }
   };
 
-  const columns: ColumnDef<Category, any>[] = [
+  const columns: ColumnDef<Category>[] = [
     columnHelper.accessor("name", {
       header: "Name",
       cell: (info) => (
