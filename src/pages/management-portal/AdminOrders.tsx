@@ -19,6 +19,7 @@ interface Order {
 interface FetchedOrder {
     id: string;
     enrolled_at: string;
+    amount: number | null;
     courses: {
         title: string;
         price: number;
@@ -40,7 +41,8 @@ const AdminOrders = () => {
                     .select(`
                         id,
                         enrolled_at,
-                        courses ( title, price ),
+                        amount,
+                        courses!left ( title, price ),
                         profiles ( full_name )
                     `)
                     .order('enrolled_at', { ascending: false });
@@ -53,7 +55,7 @@ const AdminOrders = () => {
                     id: order.id,
                     course_title: order.courses?.title || 'N/A',
                     user_name: order.profiles?.full_name || 'N/A',
-                    amount: order.courses?.price || 0,
+                    amount: order.amount ?? order.courses?.price ?? 0, // Use stored amount, fallback to course price
                     enrolled_at: new Date(order.enrolled_at).toLocaleDateString(),
                 }));
 
@@ -70,54 +72,57 @@ const AdminOrders = () => {
 
     return (
         <SidebarProvider>
-            <div className="flex min-h-screen">
-                <AdminSidebar />
-                <div className="flex-1">
-                    <AdminHeader title="Orders" />
-                    <main className="p-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Orders</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                {loading ? (
-                                    <p>Loading orders...</p>
+        <div className= "flex min-h-screen" >
+        <AdminSidebar />
+        < div className = "flex-1" >
+            <AdminHeader title="Orders" />
+                <main className="p-6" >
+                    <Card>
+                    <CardHeader>
+                    <CardTitle>Orders </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+    {
+        loading ? (
+            <p>Loading orders...</p>
                                 ) : (
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Order ID</TableHead>
-                                                <TableHead>Course</TableHead>
-                                                <TableHead>User</TableHead>
-                                                <TableHead>Amount</TableHead>
-                                                <TableHead>Date</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {orders.length > 0 ? (
-                                                orders.map(order => (
-                                                    <TableRow key={order.id}>
-                                                        <TableCell className="font-medium">{order.id.slice(0, 8)}</TableCell>
-                                                        <TableCell>{order.course_title}</TableCell>
-                                                        <TableCell>{order.user_name}</TableCell>
-                                                        <TableCell>₦{order.amount.toLocaleString()}</TableCell>
-                                                        <TableCell>{order.enrolled_at}</TableCell>
-                                                    </TableRow>
-                                                ))
+    <Table>
+    <TableHeader>
+    <TableRow>
+    <TableHead>Order ID </TableHead>
+        < TableHead > Course </TableHead>
+        < TableHead > User </TableHead>
+        < TableHead > Amount </TableHead>
+        < TableHead > Date </TableHead>
+        </TableRow>
+        </TableHeader>
+        <TableBody>
+{
+    orders.length > 0 ? (
+        orders.map(order => (
+            <TableRow key= { order.id } >
+            <TableCell className="font-medium" > { order.id.slice(0, 8) } </TableCell>
+            < TableCell > { order.course_title } </TableCell>
+            < TableCell > { order.user_name } </TableCell>
+        <TableCell>₦{ order.amount.toLocaleString() } </TableCell>
+        < TableCell > { order.enrolled_at } </TableCell>
+        </TableRow>
+        ))
                                             ) : (
-                                                <TableRow>
-                                                    <TableCell colSpan={5} className="text-center">No orders found.</TableCell>
-                                                </TableRow>
-                                            )}
-                                        </TableBody>
-                                    </Table>
+        <TableRow>
+        <TableCell colSpan= { 5} className = "text-center" > No orders found.</TableCell>
+            </TableRow>
+                                            )
+}
+</TableBody>
+    </Table>
                                 )}
-                            </CardContent>
-                        </Card>
-                    </main>
-                </div>
-            </div>
-        </SidebarProvider>
+</CardContent>
+    </Card>
+    </main>
+    </div>
+    </div>
+    </SidebarProvider>
     );
 };
 
