@@ -7,7 +7,7 @@ interface AdminAuthGuardProps {
 }
 
 export function AdminAuthGuard({ children }: AdminAuthGuardProps) {
-  const { user, userProfile, loading, isAdmin } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
   const location = useLocation();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
@@ -21,38 +21,39 @@ export function AdminAuthGuard({ children }: AdminAuthGuardProps) {
   // Show loading spinner while checking authentication
   if (loading || isCheckingAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-muted-foreground">Verifying admin access...</p>
-        </div>
-      </div>
+      <div className= "min-h-screen flex items-center justify-center bg-background" >
+      <div className="text-center space-y-4" >
+        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" > </div>
+          < p className = "text-muted-foreground" > Verifying admin access...</p>
+            </div>
+            </div>
     );
   }
 
   // Debug logging
   console.log('AdminAuthGuard Debug:', {
     user: user?.id,
-    userProfile: userProfile?.role,
+    userRole: user?.role,
     isAdminResult: isAdmin(),
     loading,
     userEmail: user?.email
   });
 
   // Check if user is authenticated and has admin privileges
-  if (!user || !userProfile || !isAdmin()) {
+  if (!user || !isAdmin()) {
     console.log('AdminAuthGuard: Redirecting to login - insufficient privileges');
     // Store the intended destination for redirect after login
     const redirectTo = location.pathname + location.search;
     return (
       <Navigate 
-        to={`/management-portal/login?redirect=${encodeURIComponent(redirectTo)}`} 
-        replace 
-      />
-    );
+        to= {`/management-portal/login?redirect=${encodeURIComponent(redirectTo)}`
   }
+  replace
+    />
+    );
+}
 
-  console.log('AdminAuthGuard: Access granted to admin user');
-  // User is authenticated and authorized - render the protected content
-  return <>{children}</>;
+console.log('AdminAuthGuard: Access granted to admin user');
+// User is authenticated and authorized - render the protected content
+return <>{ children } </>;
 }

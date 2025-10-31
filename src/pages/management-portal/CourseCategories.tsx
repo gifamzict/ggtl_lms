@@ -52,15 +52,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  created_at: string;
-}
+import { adminApi, Category } from "@/services/api/adminApi";
 
 const categorySchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -86,15 +78,10 @@ export default function CourseCategories() {
     },
   });
 
-  // Fetch categories from Supabase
+  // Fetch categories from Laravel API
   const fetchCategories = async () => {
     try {
-      const { data: categories, error } = await supabase
-        .from('categories')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      const categories = await adminApi.categories.getAll();
       setData(categories || []);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -108,39 +95,19 @@ export default function CourseCategories() {
     fetchCategories();
   }, []);
 
-  const generateSlug = (name: string): string => {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-  };
-
   const handleSubmit = async (data: CategoryFormData) => {
     try {
-      const slug = generateSlug(data.name);
-      
       if (editingCategory) {
-        const { error } = await supabase
-          .from('categories')
-          .update({
-            name: data.name,
-            slug,
-            description: data.description,
-          })
-          .eq('id', editingCategory.id);
-
-        if (error) throw error;
+        await adminApi.categories.update(editingCategory.id, {
+          name: data.name,
+          description: data.description,
+        });
         toast.success('Category updated successfully');
       } else {
-        const { error } = await supabase
-          .from('categories')
-          .insert({
-            name: data.name,
-            slug,
-            description: data.description,
-          });
-
-        if (error) throw error;
+        await adminApi.categories.create({
+          name: data.name,
+          description: data.description,
+        });
         toast.success('Category created successfully');
       }
 
@@ -148,9 +115,10 @@ export default function CourseCategories() {
       setEditingCategory(null);
       form.reset();
       fetchCategories();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving category:', error);
-      toast.error('Failed to save category');
+      const errorMessage = error.response?.data?.message || 'Failed to save category';
+      toast.error(errorMessage);
     }
   };
 
@@ -161,21 +129,17 @@ export default function CourseCategories() {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = async (categoryId: string) => {
+  const handleDelete = async (categoryId: number) => {
     if (!confirm('Are you sure you want to delete this category?')) return;
 
     try {
-      const { error } = await supabase
-        .from('categories')
-        .delete()
-        .eq('id', categoryId);
-
-      if (error) throw error;
+      await adminApi.categories.delete(categoryId);
       toast.success('Category deleted successfully');
       fetchCategories();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting category:', error);
-      toast.error('Failed to delete category');
+      const errorMessage = error.response?.data?.message || 'Failed to delete category';
+      toast.error(errorMessage);
     }
   };
 

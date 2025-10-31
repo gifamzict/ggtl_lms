@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Menu, ChevronDown, ShoppingCart, User, Shield } from 'lucide-react';
+import { Search, Menu, ChevronDown, ShoppingCart, User, Shield, LogOut } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,53 +9,71 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/authStore';
-import { useCartStore } from '@/pages/cartStore';
-import { supabase } from '@/integrations/supabase/client';
+import { useLaravelAuth } from '@/store/laravelAuthStore';
+import { useCartStore } from '@/store/cartStore';
+import { adminApi } from '@/services/api/adminApi';
 import { toast } from 'sonner';
+import { CartButton } from '@/components/cart/CartButton';
 interface Category {
-  id: string;
+  id: number;
   name: string;
   slug: string;
 }
 export function PublicNavbar() {
+  // Supabase auth (existing)
   const {
-    user,
-    userProfile,
-    signOut,
+    user: supabaseUser,
+    signOut: supabaseSignOut,
     isAdmin,
     isSuperAdmin
   } = useAuth();
+
+  // Laravel auth (new)
   const {
-    openAuthModal
-  } = useAuthStore();
-  const { items: cartItems } = useCartStore();
+    user: laravelUser,
+    isAuthenticated: isLaravelAuthenticated,
+    logout: laravelLogout
+  } = useLaravelAuth();
+
+  // Prioritize Laravel auth when available
+  const user = laravelUser || supabaseUser;
+  const isAuthenticated = isLaravelAuthenticated || !!supabaseUser;
+
+  const { openAuthModal } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const {
-          data,
-          error
-        } = await supabase.from('categories').select('*').order('name');
-        if (error) {
-          console.error('Error fetching categories:', error);
-          return;
-        }
+        const data = await adminApi.categories.getAll();
         setCategories(data || []);
       } catch (error) {
         console.error('Error fetching categories:', error);
+        // Silently fail - categories will just be empty
       }
     };
     fetchCategories();
   }, []);
   const handleSignOut = async () => {
-    await signOut();
+    if (isLaravelAuthenticated) {
+      laravelLogout();
+    } else {
+      await supabaseSignOut();
+    }
   };
+
   const getUserDisplayName = () => {
     if (!user) return '';
-    return user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
+
+    // For Laravel users
+    if (laravelUser) {
+      return laravelUser.full_name || laravelUser.name || laravelUser.email;
+    }
+
+    // For Supabase users (existing logic)
+    return (user as any)?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
   };
+
   const getUserInitials = () => {
     const name = getUserDisplayName();
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -95,7 +113,7 @@ export function PublicNavbar() {
             Contact Us
               </Link>
 {
-  user ? <>
+  isAuthenticated ? <>
     <Link to="/student/dashboard" className = "text-sm font-medium hover:text-primary transition-colors" onClick = {() => setIsOpen(false)
 }>
   Dashboard
@@ -186,23 +204,16 @@ export function PublicNavbar() {
 {/* Right Side Actions */ }
 <div className="hidden md:flex items-center space-x-4" >
 {
-  user?<>
-          {/* Cart Icon */ }
-          < Link to = "/cart" >
-  <Button variant="ghost" size = "icon" className = "relative" >
-    <ShoppingCart className="h-5 w-5" />
-      <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center" >
-        { cartItems.length }
-        </span>
-        </Button>
-        </Link>
+  isAuthenticated?<>
+          {/* Cart Button */ }
+          < CartButton />
 
-{/* User Menu */ }
-<DropdownMenu>
+  {/* User Menu */ }
+  < DropdownMenu >
   <DropdownMenuTrigger asChild >
   <Button variant="ghost" className = "relative h-8 w-8 rounded-full" >
     <Avatar className="h-8 w-8" >
-      <AvatarImage src={ user.user_metadata?.avatar_url } alt = { getUserDisplayName() } />
+      <AvatarImage src={ laravelUser?.avatar_url || (user as any)?.user_metadata?.avatar_url } alt = { getUserDisplayName() } />
         <AvatarFallback className="bg-primary text-primary-foreground" >
           { getUserInitials() }
           </AvatarFallback>
@@ -214,17 +225,17 @@ export function PublicNavbar() {
               <div className="flex flex-col space-y-1 leading-none" >
                 <p className="font-medium" > { getUserDisplayName() } </p>
                   < p className = "w-[200px] truncate text-sm text-muted-foreground" >
-                    { user.email }
-                    </p>
-                    </div>
-                    </div>
-                    < DropdownMenuSeparator />
-                    <DropdownMenuItem asChild >
-                    <Link to="/student/dashboard" className = "flex items-center" >
-                      <User className="mr-2 h-4 w-4" />
-                        Dashboard
-                        </Link>
-                        </DropdownMenuItem>
+                    { laravelUser?.email || user?.email}
+</p>
+  </div>
+  </div>
+  < DropdownMenuSeparator />
+  <DropdownMenuItem asChild >
+  <Link to="/student/dashboard" className = "flex items-center" >
+    <User className="mr-2 h-4 w-4" />
+      Dashboard
+      </Link>
+      </DropdownMenuItem>
 
 {/* Admin Access */ }
 {

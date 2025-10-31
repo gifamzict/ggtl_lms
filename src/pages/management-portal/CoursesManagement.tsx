@@ -34,11 +34,10 @@ import { AdminSidebar } from "@/components/management-portal/AdminSidebar";
 import { AdminHeader } from "@/components/management-portal/AdminHeader";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { requireAdminAuth } from "@/middleware/adminAuth";
+import { adminApi } from "@/services/api/adminApi";
 
 interface Course {
-  id: string;
+  id: number;
   title: string;
   instructor: string;
   price: number;
@@ -55,33 +54,19 @@ export default function CoursesManagement() {
   const [globalFilter, setGlobalFilter] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Fetch courses from Supabase
+  // Fetch courses from Laravel API
   const fetchCourses = async () => {
     try {
       setLoading(true);
       
-      // Verify admin permissions before fetching
-      await requireAdminAuth();
-      const { data: courses, error } = await supabase
-        .from('courses')
-        .select(`
-          *,
-          profiles!courses_instructor_id_fkey(full_name)
-        `)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching courses:', error);
-        toast.error('Failed to fetch courses');
-        return;
-      }
+      const courses = await adminApi.courses.getAll();
 
       if (courses) {
         const transformedCourses: Course[] = courses.map(course => ({
           id: course.id,
           title: course.title,
-          instructor: course.profiles?.full_name || 'Unknown',
-          price: course.price || 0,
+          instructor: course.instructor?.full_name || course.instructor?.name || 'Unknown',
+          price: parseFloat(course.price) || 0,
           status: course.status,
           isActive: course.status === 'PUBLISHED'
         }));
@@ -99,22 +84,10 @@ export default function CoursesManagement() {
     fetchCourses();
   }, []);
 
-  const handleStatusToggle = async (courseId: string, newStatus: boolean) => {
+  const handleStatusToggle = async (courseId: number, newStatus: boolean) => {
     try {
-      // Verify admin permissions before updating
-      await requireAdminAuth();
-      
       const status = newStatus ? 'PUBLISHED' : 'DRAFT';
-      const { error } = await supabase
-        .from('courses')
-        .update({ status })
-        .eq('id', courseId);
-
-      if (error) {
-        console.error('Error updating course status:', error);
-        toast.error('Failed to update course status');
-        return;
-      }
+      await adminApi.courses.update(courseId, { status });
 
       setData(prev => 
         prev.map(course => 
@@ -130,18 +103,13 @@ export default function CoursesManagement() {
     }
   };
 
-  const handleDelete = async (courseId: string) => {
-    try {
-      const { error } = await supabase
-        .from('courses')
-        .delete()
-        .eq('id', courseId);
+  const handleDelete = async (courseId: number) => {
+    if (!confirm('Are you sure you want to delete this course? This will also delete all associated lessons.')) {
+      return;
+    }
 
-      if (error) {
-        console.error('Error deleting course:', error);
-        toast.error('Failed to delete course');
-        return;
-      }
+    try {
+      await adminApi.courses.delete(courseId);
 
       setData(prev => prev.filter(course => course.id !== courseId));
       toast.success('Course deleted successfully');

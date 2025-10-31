@@ -1,588 +1,459 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Bar,
-  BarChart,
-  ComposedChart,
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
-} from "recharts";
-import { AdminSidebar } from "@/components/management-portal/AdminSidebar";
-import { AdminHeader } from "@/components/management-portal/AdminHeader";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { Skeleton } from "@/components/ui/skeleton";
-import { DollarSign, ShoppingCart, BookOpen, Users, CheckCircle, XCircle } from "lucide-react";
-import { useAdminStats } from "@/hooks/useAdminStats";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-
-interface StatCardProps {
-  title: string;
-  value: string | number;
-  icon: React.ReactNode;
-  currency?: string;
-}
-
-interface RecentCourse {
-  title: string;
-  status: string;
-  categories: {
-    name: string;
-  } | null;
-}
-
-interface RecentOrder {
-  id: string;
-  courses: {
-    price: number;
-  } | null;
-  profiles: {
-    full_name: string;
-  } | null;
-}
-
-interface ChartData {
-  month: string;
-  year: number;
-  orderAmount: number;
-  orderCount: number;
-}
-
-interface CategoryChartData {
-  name: string;
-  value: number;
-}
-
-interface TopCourseData {
-  title: string;
-  enrollment_count: number;
-}
-
-interface NewUserChartData {
-  month: string;
-  year: number;
-  userCount: number;
-}
-
-interface PriceDistributionData {
-  name: string;
-  count: number;
-}
-
-interface MonthlyData {
-  enrolled_at: string;
-  courses: {
-    price: number;
-  }
-}
-
-interface UserData {
-  created_at: string;
-}
-
-const StatCard = ({ title, value, icon, currency }: StatCardProps) => (
-  <Card className= "bg-card border-border" >
-  <CardContent className="flex items-center justify-between p-6" >
-    <div>
-    <p className="text-sm font-medium text-muted-foreground" > { title } </p>
-      < p className = "text-2xl font-bold text-foreground" >
-        { currency && currency}{ value }
-</p>
-  </div>
-  < div className = "p-3 bg-primary/10 rounded-lg" >
-    <div className="text-primary" > { icon } </div>
-      </div>
-      </CardContent>
-      </Card>
-);
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF'];
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { BarChart3, Users, BookOpen, TrendingUp, LogOut, Menu, Bell, Search, UserCheck, Award, Clock, ChevronRight, Moon, Sun, ShoppingCart, CreditCard, CheckCircle, AlertCircle, Eye, Edit } from 'lucide-react';
+import { adminApi, DashboardStats } from '@/services/api/adminApi';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
+import CoursesManagement from '../components/admin/CoursesManagement';
+import StudentManagement from '../components/admin/StudentManagement';
+import OrdersManagement from '../components/admin/OrdersManagement';
+import CategoryManagement from '../components/admin/CategoryManagement';
+import PaymentsManagement from '../components/admin/PaymentsManagement';
 
 export default function AdminDashboard() {
-  const { stats, loading: statsLoading, error } = useAdminStats();
-  const [recentCourses, setRecentCourses] = useState<RecentCourse[]>([]);
-  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
-  const [chartData, setChartData] = useState<ChartData[]>([]);
-  const [categoryChartData, setCategoryChartData] = useState<CategoryChartData[]>([]);
-  const [topCoursesData, setTopCoursesData] = useState<TopCourseData[]>([]);
-  const [newUserChartData, setNewUserChartData] = useState<NewUserChartData[]>([]);
-  const [priceDistributionData, setPriceDistributionData] = useState<PriceDistributionData[]>([]);
+  const navigate = useNavigate();
+  const { signOut, user } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [notifications] = useState(3);
+  const [animateCards, setAnimateCards] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState<DashboardStats | null>(null);
+  const [darkMode, setDarkMode] = useState(() => {
+    const savedTheme = localStorage.getItem('theme');
+    return savedTheme === 'dark';
+  });
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        // Fetch recent courses
-        const { data: coursesData, error: coursesError } = await supabase
-          .from('courses')
-          .select('title, status, categories(name)')
-          .order('created_at', { ascending: false })
-          .limit(5);
-
-        if (coursesError) throw coursesError;
-        setRecentCourses(coursesData as RecentCourse[]);
-
-        // Fetch recent orders
-        const { data: ordersData, error: ordersError } = await supabase
-          .from('enrollments')
-          .select(`
-            id,
-            courses ( price ),
-            profiles ( full_name )
-          `)
-          .order('enrolled_at', { ascending: false })
-          .limit(5);
-
-        if (ordersError) throw ordersError;
-        setRecentOrders(ordersData as RecentOrder[]);
-
-        // Fetch chart data
-        const today = new Date();
-        const twelveMonthsAgo = new Date(new Date().setMonth(today.getMonth() - 12));
-
-        const { data: monthlyData, error: monthlyError } = await supabase
-          .from('enrollments')
-          .select('enrolled_at, courses(price)')
-          .gte('enrolled_at', twelveMonthsAgo.toISOString());
-
-        if (monthlyError) throw monthlyError;
-
-        const months = Array.from({ length: 12 }, (_, i) => {
-          const date = new Date();
-          date.setMonth(date.getMonth() - i);
-          return {
-            month: date.toLocaleString('default', { month: 'short' }),
-            year: date.getFullYear(),
-            orderAmount: 0,
-            orderCount: 0,
-          };
-        }).reverse();
-
-        (monthlyData as MonthlyData[]).forEach((enrollment) => {
-          const month = new Date(enrollment.enrolled_at).toLocaleString('default', { month: 'short' });
-          const year = new Date(enrollment.enrolled_at).getFullYear();
-          const monthData = months.find(m => m.month === month && m.year === year);
-          if (monthData) {
-            monthData.orderAmount += enrollment.courses.price;
-            monthData.orderCount += 1;
-          }
-        });
-
-        setChartData(months);
-
-        // Fetch category data for pie chart
-        const { data: categoryData, error: categoryError } = await supabase
-          .from('courses')
-          .select('categories(name)');
-
-        if (categoryError) throw categoryError;
-
-        const categoryCounts = categoryData.reduce((acc, course) => {
-          const categoryName = course.categories?.name || 'Uncategorized';
-          acc[categoryName] = (acc[categoryName] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>);
-
-        const pieChartData = Object.keys(categoryCounts).map(key => ({
-          name: key,
-          value: categoryCounts[key],
-        }));
-
-        setCategoryChartData(pieChartData);
-
-        // Fetch top courses data
-        const { data: topCourses, error: topCoursesError } = await supabase.rpc('get_top_courses');
-
-        if (topCoursesError) throw topCoursesError;
-        setTopCoursesData(topCourses as TopCourseData[]);
-
-        // Fetch new user data
-        const { data: usersData, error: usersError } = await supabase
-          .from('profiles')
-          .select('created_at')
-          .gte('created_at', twelveMonthsAgo.toISOString());
-
-        if (usersError) throw usersError;
-
-        const userMonths = Array.from({ length: 12 }, (_, i) => {
-          const date = new Date();
-          date.setMonth(date.getMonth() - i);
-          return {
-            month: date.toLocaleString('default', { month: 'short' }),
-            year: date.getFullYear(),
-            userCount: 0,
-          };
-        }).reverse();
-
-        (usersData as UserData[]).forEach((user) => {
-          const month = new Date(user.created_at).toLocaleString('default', { month: 'short' });
-          const year = new Date(user.created_at).getFullYear();
-          const monthData = userMonths.find(m => m.month === month && m.year === year);
-          if (monthData) {
-            monthData.userCount += 1;
-          }
-        });
-
-        setNewUserChartData(userMonths);
-
-        // Fetch price distribution data
-        const { data: pricesData, error: pricesError } = await supabase
-          .from('courses')
-          .select('price');
-
-        if (pricesError) throw pricesError;
-
-        const prices = pricesData.map(p => p.price);
-        const maxPrice = Math.max(...prices);
-        const binSize = 10000;
-        const bins = Array.from({ length: Math.ceil(maxPrice / binSize) }, (_, i) => {
-          const binStart = i * binSize;
-          const binEnd = binStart + binSize;
-          return {
-            name: `₦${binStart.toLocaleString()}-₦${binEnd.toLocaleString()}`,
-            count: 0,
-          };
-        });
-
-        prices.forEach(price => {
-          const binIndex = Math.floor(price / binSize);
-          if (bins[binIndex]) {
-            bins[binIndex].count++;
-          }
-        });
-
-        setPriceDistributionData(bins);
-
-      } catch (error) {
-        toast.error('Failed to fetch dashboard data.');
-      }
-    };
-
+    setAnimateCards(true);
     fetchDashboardData();
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      console.log('Fetching dashboard data...');
+      const data = await adminApi.dashboard.getStats();
+      console.log('Dashboard data received:', data);
+      setDashboardData(data);
+    } catch (error: any) {
+      console.error('Error fetching dashboard data:', error);
+      console.error('Error details:', error.response?.data || error.message);
+      toast.error('Failed to load dashboard data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+  };
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+
+  // Helper function to format currency properly
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-NG', {
+      style: 'currency',
+      currency: 'NGN',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  // Helper function to format percentage change
+  const formatPercentageChange = (value: number) => {
+    const sign = value >= 0 ? '+' : '';
+    return `${sign}${value}%`;
+  };
+
+  const stats = [
+    {
+      label: 'Total Students',
+      value: dashboardData?.stats?.total_students || 0,
+      change: formatPercentageChange(dashboardData?.stats?.students_change || 0),
+      icon: Users,
+      color: 'from-blue-500 to-blue-600',
+      bgColor: darkMode ? 'bg-blue-900/30' : 'bg-blue-50',
+      changePositive: (dashboardData?.stats?.students_change || 0) >= 0
+    },
+    {
+      label: 'Active Courses',
+      value: dashboardData?.stats?.total_courses || 0,
+      change: null, // Courses don't typically have monthly changes
+      icon: BookOpen,
+      color: 'from-purple-500 to-purple-600',
+      bgColor: darkMode ? 'bg-purple-900/30' : 'bg-purple-50',
+      changePositive: true
+    },
+    {
+      label: 'Total Enrollments',
+      value: dashboardData?.stats?.total_enrollments || 0,
+      change: formatPercentageChange(dashboardData?.stats?.enrollments_change || 0),
+      icon: UserCheck,
+      color: 'from-green-500 to-green-600',
+      bgColor: darkMode ? 'bg-green-900/30' : 'bg-green-50',
+      changePositive: (dashboardData?.stats?.enrollments_change || 0) >= 0
+    },
+    {
+      label: 'Revenue',
+      value: formatCurrency(dashboardData?.stats?.total_revenue || 0),
+      change: formatPercentageChange(dashboardData?.stats?.revenue_change || 0),
+      icon: TrendingUp,
+      color: 'from-orange-500 to-orange-600',
+      bgColor: darkMode ? 'bg-orange-900/30' : 'bg-orange-50',
+      changePositive: (dashboardData?.stats?.revenue_change || 0) >= 0
+    },
+  ];
+
+  const recentCourses = dashboardData?.top_courses?.slice(0, 4) || [];
+  const recentUsers = dashboardData?.recent_enrollments?.slice(0, 4) || [];
+
+  const NavItem = ({ icon: Icon, label, tabName, route }: any) => (
+    <button
+      onClick= {() => {
+    if (route) {
+      navigate(route);
+    } else {
+      setActiveTab(tabName);
+    }
+  }
+}
+className = {`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-left group relative overflow-hidden ${activeTab === tabName
+  ? darkMode
+    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+    : 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
+  : darkMode
+    ? 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
+    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+  }`}
+    >
+  <Icon className={
+  `w-5 h-5 flex-shrink-0 transition-transform duration-300 ${activeTab === tabName ? 'scale-110' : 'group-hover:scale-105'
+    }`
+} />
+{
+  sidebarOpen && (
+    <span className="font-medium transition-all duration-300" > { label } </span>
+      )
+}
+{
+  activeTab === tabName && sidebarOpen && (
+    <ChevronRight className="w-4 h-4 ml-auto" />
+      )
+}
+</button>
+  );
+
+if (loading) {
   return (
-    <SidebarProvider>
-    <div className= "min-h-screen flex w-full bg-background" >
-    <AdminSidebar />
+    <div className= {`min-h-screen flex items-center justify-center ${darkMode ? 'bg-gray-900' : 'bg-gray-50'
+      }`
+}>
+  <div className="text-center" >
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" > </div>
+      < p className = {`mt-4 text-lg font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'
+        }`}>
+          Loading dashboard...
+</p>
+  </div>
+  </div>
+    );
+  }
 
-    < main className = "flex-1 p-6" >
-      <AdminHeader title="Dashboard" />
+return (
+  <div className= {`flex h-screen transition-colors duration-500 overflow-hidden ${darkMode
+    ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900'
+    : 'bg-gradient-to-br from-gray-50 to-gray-100'
+    }`}>
+      {/* Sidebar */ }
+      < div
+className = {`${sidebarOpen ? 'w-64' : 'w-20'
+  } ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+  } shadow-2xl transition-all duration-500 ease-in-out flex flex-col border-r`}
+      >
+  {/* Logo */ }
+  < div className = {`p-6 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+    <div className="flex items-center gap-3" >
+      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg" >
+        <BarChart3 className="w-6 h-6 text-white" />
+          </div>
+{
+  sidebarOpen && (
+    <div className="overflow-hidden" >
+      <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent" >
+        GGTL Admin
+          </h1>
+          < p className = {`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`
+}>
+  Control Panel
+    </p>
+    </div>
+            )}
+</div>
+  </div>
 
-        {/* KPI Cards */ }
-        < div className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" >
-        {
-          statsLoading?(
-            // Loading skeletons
-            Array.from({ length: 8 }).map((_, i) => (
-              <Card key= { i } className = "bg-card border-border" >
-              <CardContent className="flex items-center justify-between p-6" >
-            <div className="space-y-2" >
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-8 w-16" />
-            </div>
-            < Skeleton className = "h-12 w-12 rounded-lg" />
-            </CardContent>
-            </Card>
-            ))
-            ) : error?(
-              <div className = "col-span-full text-center py-8" >
-                <p className="text-destructive"> Error loading statistics: { error } </p>
-                  </div>
-            ) : (
-    <>
-    <StatCard
-                  title= "Today's Orders"
-  value = { stats.todayOrders }
-  icon = {< DollarSign className = "w-6 h-6" />}
-                />
-  < StatCard
-title = "This Week's Orders"
-value = { stats.thisWeekOrders }
-icon = {< DollarSign className = "w-6 h-6" />}
-                />
-  < StatCard
-title = "This Month's Orders"
-value = { stats.thisMonthOrders }
-icon = {< DollarSign className = "w-6 h-6" />}
-                />
-  < StatCard
-title = "Total Orders"
-value = { stats.totalOrders }
-icon = {< ShoppingCart className = "w-6 h-6" />}
-                />
-  < StatCard
-title = "Total Revenue"
-value = { stats.totalRevenue.toLocaleString() }
-icon = {< DollarSign className = "w-6 h-6" />}
-currency = "₦"
-  />
-  <StatCard
-                  title="Total Courses"
-value = { stats.totalCourses }
-icon = {< BookOpen className = "w-6 h-6" />}
-                />
-  < StatCard
-title = "Pending Courses"
-value = { stats.pendingCourses }
-icon = {< BookOpen className = "w-6 h-6" />}
-                />
-  < StatCard
-title = "Rejected Courses"
-value = { stats.rejectedCourses }
-icon = {< XCircle className = "w-6 h-6" />}
-                />
-  < StatCard
-title = "Active Courses"
-value = { stats.activeCourses }
-icon = {< CheckCircle className = "w-6 h-6" />}
-                />
-  </>
+{/* Navigation */ }
+<nav className="flex-1 p-4 space-y-2 overflow-y-auto" >
+  <NavItem icon={ BarChart3 } label = "Overview" tabName = "overview" />
+    <NavItem icon={ BookOpen } label = "Courses" tabName = "courses" />
+      <NavItem icon={ Users } label = "Students" tabName = "students" />
+        <NavItem icon={ ShoppingCart } label = "Orders" tabName = "orders" />
+          <NavItem icon={ CreditCard } label = "Payments" tabName = "payments" />
+            <NavItem icon={ Award } label = "Categories" tabName = "categories" />
+              </nav>
+
+{/* User Profile */ }
+<div className={ `p-4 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}` }>
+  <div className={
+  `flex items-center gap-3 p-3 rounded-xl transition-all duration-300 cursor-pointer ${darkMode ? 'hover:bg-gray-700/50' : 'hover:bg-gray-100'
+    }`
+}>
+  <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center text-white font-bold text-sm" >
+    { user?.name?.charAt(0) || 'A'}
+</div>
+{
+  sidebarOpen && (
+    <div className="flex-1 overflow-hidden" >
+      <p className={
+    `text-sm font-medium truncate ${darkMode ? 'text-gray-200' : 'text-gray-700'
+      }`
+  }>
+    { user?.name || 'Admin User'
+}
+</p>
+  < p className = {`text-xs truncate ${darkMode ? 'text-gray-400' : 'text-gray-500'
+    }`}>
+      { user?.email || 'admin@example.com'}
+</p>
+  </div>
             )}
 </div>
 
-{/* Main Chart */ }
-<Card className="mb-8" >
-  <CardHeader>
+  < div className = "flex gap-2 mt-3" >
+    <button
+              onClick={ toggleDarkMode }
+className = {`flex-1 p-2 rounded-lg transition-colors ${darkMode
+  ? 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+  : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+  }`}
+title = { darkMode? 'Switch to Light Mode': 'Switch to Dark Mode' }
+  >
+  { darkMode?<Sun className = "w-4 h-4 mx-auto" /> : <Moon className="w-4 h-4 mx-auto" />}
+</button>
+  < button
+onClick = { handleLogout }
+className = "flex-1 p-2 rounded-lg bg-red-500 hover:bg-red-600 text-white transition-colors"
+title = "Logout"
+  >
+  <LogOut className="w-4 h-4 mx-auto" />
+    </button>
+    </div>
+    </div>
+    </div>
+
+{/* Main Content */ }
+<div className="flex-1 flex flex-col overflow-hidden" >
+  {/* Top Bar */ }
+  < header className = {`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b shadow-sm`}>
+    <div className="flex items-center justify-between px-6 py-4" >
+      <div className="flex items-center gap-4" >
+        <button
+                onClick={ () => setSidebarOpen(!sidebarOpen) }
+className = {`p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-600'
+  }`}
+              >
+  <Menu className="w-5 h-5" />
+    </button>
+
+    < div className = "hidden md:flex items-center gap-2" >
+      <Search className={ `w-5 h-5 ${darkMode ? 'text-gray-400' : 'text-gray-500'}` } />
+        < input
+type = "text"
+placeholder = "Search..."
+className = {`px-3 py-2 rounded-lg border-none outline-none bg-transparent ${darkMode ? 'text-gray-200 placeholder-gray-400' : 'text-gray-700 placeholder-gray-500'
+  }`}
+                />
+  </div>
+  </div>
+
+  < div className = "flex items-center gap-4" >
+    <button className={
+  `relative p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-600'
+    }`
+}>
+  <Bell className="w-5 h-5" />
+    { notifications > 0 && (
+      <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center" >
+        { notifications }
+        </span>
+                )}
+</button>
+  </div>
+  </div>
+  </header>
+
+{/* Content Area */ }
+<main className="flex-1 overflow-y-auto p-6" >
+  { activeTab === 'overview' && (
+    <div className="space-y-6" >
+      {/* Stats Cards */ }
+      < div className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" >
+      {
+        stats.map((stat, index) => (
+          <div
+                    key= { index }
+                    className = {`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-500 transform ${animateCards ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+            } hover:-translate-y-1 group`}
+style = {{ transitionDelay: `${index * 100}ms` }}
+                  >
   <div className="flex items-center justify-between" >
     <div>
-    <CardTitle className="text-lg font-semibold text-foreground" > Order Analytics </CardTitle>
+    <p className={ `text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-500'}` }>
+      { stat.label }
+      </p>
+      < p className = {`text-3xl font-bold mt-1 ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+        { stat.value }
+        </p>
+{
+  stat.change && (
+    <p className={
+      `text-sm mt-1 font-medium ${stat.changePositive
+        ? 'text-green-600'
+        : 'text-red-600'
+      }`
+  }>
+    { stat.change }
+    </p>
+          )
+}
+</div>
+  < div className = {`w-12 h-12 rounded-xl bg-gradient-to-r ${stat.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+    <stat.icon className="w-6 h-6 text-white" />
       </div>
-      < div className = "flex items-center space-x-4 text-sm" >
-        <div className="flex items-center" >
-          <div className="w-3 h-3 bg-blue-500 rounded mr-2" > </div>
-            < span > Order Amount(₦) </span>
-              </div>
-              < div className = "flex items-center" >
-                <div className="w-3 h-3 bg-pink-500 rounded mr-2" > </div>
-                  < span > Order Count </span>
-                    </div>
-                    </div>
-                    </div>
-                    </CardHeader>
-                    < CardContent >
-                    <div className="h-96" >
-                      <ResponsiveContainer width="100%" height = "100%" >
-                        <ComposedChart data={ chartData }>
-                          <CartesianGrid strokeDasharray="3 3" className = "stroke-muted" />
-                            <XAxis 
-                      dataKey="month"
-axisLine = { false}
-tickLine = { false}
-className = "text-muted-foreground"
-tick = {{ fontSize: 12 }}
-                    />
-  < YAxis
-yAxisId = "left"
-axisLine = { false}
-tickLine = { false}
-className = "text-muted-foreground"
-tick = {{ fontSize: 12 }}
-domain = { [0, 'dataMax + 20000']}
-  />
-  <YAxis 
-                      yAxisId="right"
-orientation = "right"
-axisLine = { false}
-tickLine = { false}
-className = "text-muted-foreground"
-tick = {{ fontSize: 12 }}
-domain = { [0, 'dataMax + 5']}
-  />
-  <Tooltip 
-                      contentStyle={
-  {
-    backgroundColor: 'hsl(var(--background))',
-      border: '1px solid hsl(var(--border))',
-        borderRadius: '8px',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-            color: 'hsl(var(--foreground))'
-  }
-}
-                    />
-  < Bar
-yAxisId = "left"
-dataKey = "orderAmount"
-fill = "hsl(var(--primary))"
-radius = { [4, 4, 0, 0]}
-  />
-  <Line 
-                      yAxisId="right"
-type = "monotone"
-dataKey = "orderCount"
-stroke = "#ec4899"
-strokeWidth = { 3}
-dot = {{ fill: '#ec4899', strokeWidth: 2, r: 6 }}
-activeDot = {{ r: 8, fill: '#ec4899' }}
-                    />
-  </ComposedChart>
-  </ResponsiveContainer>
-  </div>
-  </CardContent>
-  </Card>
+      </div>
+      </div>
+                ))}
+</div>
 
-  < div className = "grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8" >
-    {/* Course Categories Pie Chart */ }
-    < Card className = "lg:col-span-1" >
-      <CardHeader>
-      <CardTitle className="text-lg font-semibold text-foreground" > Course Categories </CardTitle>
-        </CardHeader>
-        < CardContent >
-        <div className="h-80" >
-          <ResponsiveContainer width="100%" height = "100%" >
-            <PieChart>
-            <Pie
-                        data={ categoryChartData }
-cx = "50%"
-cy = "50%"
-labelLine = { false}
-outerRadius = { 80}
-fill = "#8884d8"
-dataKey = "value"
-nameKey = "name"
-label = {({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      >
-{
-  categoryChartData.map((entry, index) => (
-    <Cell key= {`cell-${index}`} fill = { COLORS[index % COLORS.length]} />
-                        ))}
-</Pie>
-  < Tooltip />
-  <Legend />
-  </PieChart>
-  </ResponsiveContainer>
-  </div>
-  </CardContent>
-  </Card>
-
-{/* Top 5 Courses Bar Chart */ }
-<Card className="lg:col-span-2" >
-  <CardHeader>
-  <CardTitle className="text-lg font-semibold text-foreground" > Top 5 Enrolled Courses </CardTitle>
-    </CardHeader>
-    < CardContent >
-    <div className="h-80" >
-      <ResponsiveContainer width="100%" height = "100%" >
-        <BarChart data={ topCoursesData } layout = "vertical" >
-          <CartesianGrid strokeDasharray="3 3" />
-            <XAxis type="number" />
-              <YAxis dataKey="title" type = "category" width = { 150} />
-                <Tooltip />
-                < Legend />
-                <Bar dataKey="enrollment_count" fill = "#8884d8" />
-                  </BarChart>
-                  </ResponsiveContainer>
+{/* Recent Activity */ }
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-6" >
+  {/* Recent Courses */ }
+  < div className = {`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-6 shadow-lg`}>
+    <div className="flex items-center justify-between mb-6" >
+      <h3 className={ `text-xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'}` }>
+        Top Courses
+          </h3>
+          < Clock className = {`w-5 h-5 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+            </div>
+            < div className = "space-y-4" >
+            {
+              recentCourses.length > 0 ? recentCourses.map((course: any, index: number) => (
+                <div key= { index } className = {`flex items-center gap-4 p-3 rounded-xl transition-colors ${darkMode ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'
+                  }`} >
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-md" >
+                <BookOpen className="w-6 h-6 text-white" />
                   </div>
-                  </CardContent>
-                  </Card>
-                  </div>
-
-                  < div className = "grid grid-cols-1 lg:grid-cols-2 gap-6" >
-                    {/* Recent Courses */ }
-                    < Card >
-                    <CardHeader>
-                    <CardTitle className="text-lg font-semibold text-foreground" > Recent Courses </CardTitle>
-                      </CardHeader>
-                      < CardContent >
-                      <div className="space-y-4" >
-                        <div className="flex justify-between text-sm font-medium text-muted-foreground border-b pb-2" >
-                          <span>COURSE </span>
-                          < span > STATUS </span>
+                  < div className = "flex-1" >
+                    <h4 className={ `font-medium ${darkMode ? 'text-gray-200' : 'text-gray-800'}` }>
+                      { course.title }
+                      </h4>
+                      < p className = {`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                        { course.total_enrollments || 0 } enrollments
+                          </p>
                           </div>
-{
-  recentCourses.map((course, index) => (
-    <div key= { index } className = "flex justify-between items-center" >
-    <span className="text-sm text-primary hover:underline cursor-pointer" >
-    { course.title }
-    </span>
-  < span className = {`px-2 py-1 text-xs rounded-full ${course.status === 'PUBLISHED' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' : course.status === 'DRAFT' ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100' : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100'}`}>
-    { course.status }
-    </span>
-    </div>
-                  ))}
-</div>
-  </CardContent>
-  </Card>
-
-{/* Recent Orders */ }
-<Card>
-  <CardHeader>
-  <CardTitle className="text-lg font-semibold text-foreground" > Recent Orders </CardTitle>
-    </CardHeader>
-    < CardContent >
-    <div className="space-y-4" >
-      <div className="grid grid-cols-3 text-sm font-medium text-muted-foreground border-b pb-2" >
-        <span>INVOICE </span>
-        < span > USER </span>
-        < span > AMOUNT </span>
-        </div>
-{
-  recentOrders.map((order, index) => (
-    <div key= { index } className = "grid grid-cols-3 text-sm" >
-    <span className="text-primary hover:underline cursor-pointer" >
-    { order.id.slice(0, 8) }
-    </span>
-  < span className = "text-foreground" > { order.profiles.full_name } </span>
-  < span className = "text-foreground" >₦{ order.courses.price.toLocaleString() } </span>
+                          < div className = "text-right" >
+                            <p className={ `font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'}` }>
+                            ₦{ (course.price || 0).toLocaleString() }
+</p>
   </div>
-  ))
+  </div>
+                    )) : (
+  <p className= {`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+    No courses available
+      </p>
+                    )}
+</div>
+  </div>
+
+{/* Recent Users */ }
+<div className={ `${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-6 shadow-lg` }>
+  <div className="flex items-center justify-between mb-6" >
+    <h3 className={ `text-xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'}` }>
+      Recent Enrollments
+        </h3>
+        < Users className = {`w-5 h-5 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+          </div>
+          < div className = "space-y-4" >
+          {
+            recentUsers.length > 0 ? recentUsers.map((enrollment: any, index: number) => (
+              <div key= { index } className = {`flex items-center gap-4 p-3 rounded-xl transition-colors ${darkMode ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'
+                }`} >
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-teal-600 rounded-full flex items-center justify-center text-white font-bold text-sm" >
+              { enrollment.user?.name?.charAt(0) || 'U' }
+              </div>
+              < div className = "flex-1" >
+                <h4 className={ `font-medium ${darkMode ? 'text-gray-200' : 'text-gray-800'}` }>
+                  { enrollment.user?.name || 'Unknown User' }
+                  </h4>
+                  < p className = {`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    { enrollment.course?.title || 'Course' }
+                    </p>
+                    </div>
+                    < div className = "text-right" >
+                      <p className={ `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}` }>
+                        { new Date(enrollment.enrolled_at).toLocaleDateString() }
+                        </p>
+                        </div>
+                        </div>
+                    )) : (
+  <p className= {`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+    No recent enrollments
+      </p>
+                    )}
+</div>
+  </div>
+  </div>
+  </div>
+          )}
+
+{
+  activeTab === 'courses' && (
+    <CoursesManagement darkMode={ darkMode } dashboardData = { dashboardData } />
+          )
 }
-</div>
-  </CardContent>
-  </Card>
+
+{
+  activeTab === 'students' && (
+    <StudentManagement darkMode={ darkMode } dashboardData = { dashboardData } />
+          )
+}
+
+{
+  activeTab === 'orders' && (
+    <OrdersManagement darkMode={ darkMode } dashboardData = { dashboardData } />
+          )
+}
+
+{
+  activeTab === 'categories' && (
+    <CategoryManagement darkMode={ darkMode } dashboardData = { dashboardData } />
+          )
+}
+
+{
+  activeTab === 'payments' && (
+    <PaymentsManagement darkMode={ darkMode } dashboardData = { dashboardData } />
+          )
+}
+</main>
   </div>
-
-{/* New User Growth Chart */ }
-<Card className="mt-8" >
-  <CardHeader>
-  <CardTitle className="text-lg font-semibold text-foreground" > New User Growth </CardTitle>
-    </CardHeader>
-    < CardContent >
-    <div className="h-80" >
-      <ResponsiveContainer width="100%" height = "100%" >
-        <LineChart data={ newUserChartData }>
-          <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-              <YAxis />
-              < Tooltip />
-              <Legend />
-              < Line type = "monotone" dataKey = "userCount" stroke = "#8884d8" activeDot = {{ r: 8 }} />
-                </LineChart>
-                </ResponsiveContainer>
-                </div>
-                </CardContent>
-                </Card>
-
-{/* Course Price Distribution Histogram */ }
-<Card className="mt-8" >
-  <CardHeader>
-  <CardTitle className="text-lg font-semibold text-foreground" > Course Price Distribution </CardTitle>
-    </CardHeader>
-    < CardContent >
-    <div className="h-80" >
-      <ResponsiveContainer width="100%" height = "100%" >
-        <BarChart data={ priceDistributionData }>
-          <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-              <YAxis />
-              < Tooltip />
-              <Legend />
-              < Bar dataKey = "count" fill = "#82ca9d" />
-                </BarChart>
-                </ResponsiveContainer>
-                </div>
-                </CardContent>
-                </Card>
-                </main>
-                </div>
-                </SidebarProvider>
+  </div>
   );
 }

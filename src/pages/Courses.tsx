@@ -1,278 +1,185 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { BookOpen, Clock, Users, Star, Filter } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { BookOpen, Filter, ShoppingCart, Loader2 } from 'lucide-react';
+import { CourseCard, Course } from '@/components/course/CourseCard';
+import { useCartStore } from '@/store/cartStore';
+import { useLaravelAuth } from '@/store/laravelAuthStore';
+import { publicApi } from '@/services/api/publicApi';
 import { toast } from 'sonner';
 
-interface Course {
-  id: string;
-  title: string;
-  description: string;
-  thumbnail_url: string;
-  total_lessons: number;
-  total_duration: number;
-  price: number;
-  status: string;
-  instructor_id: string;
-  category_id: string;
-  slug: string;
-  categories?: {
-    name: string;
-  };
-  profiles?: {
-    full_name: string;
-  };
-}
-
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-}
-
 export default function Courses() {
-  const [searchParams, setSearchParams] = useSearchParams();
   const [courses, setCourses] = useState<Course[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>(() => {
-    return searchParams.get('category') || 'all';
-  });
   const [loading, setLoading] = useState(true);
+  const [selectedLevel, setSelectedLevel] = useState<string>('all');
+  const [priceFilter, setPriceFilter] = useState<string>('all');
+  const { totalItems } = useCartStore();
+  const { isAuthenticated, token } = useLaravelAuth();
 
+  // Fetch courses from API on component mount
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchCourses = async () => {
       try {
         setLoading(true);
+        console.log('🔄 Fetching courses from public API...');
+        console.log('🔑 Auth token:', token ? 'Present' : 'Not present');
 
-        // Fetch published courses with instructor and category data
-        const { data: coursesData, error: coursesError } = await supabase
-          .from('courses')
-          .select(`
-            *,
-            categories (name),
-            profiles (full_name)
-          `)
-          .eq('status', 'PUBLISHED');
+        const response = await publicApi.getCourses(undefined, token || undefined);
+        console.log('✅ Courses fetched successfully:', response);
 
-        if (coursesError) {
-          console.error('Error fetching courses:', coursesError);
-          toast.error('Failed to load courses');
-          return;
-        }
+        // Map the API response to our Course interface
+        const mappedCourses: Course[] = response.data.map((course: any) => ({
+          id: course.id,
+          title: course.title,
+          description: course.description,
+          price: course.price || 0,
+          instructor: course.instructor?.first_name + ' ' + course.instructor?.last_name || 'Unknown Instructor',
+          thumbnail_url: course.thumbnail_url,
+          duration: course.duration,
+          level: course.level,
+          rating: course.rating || 4.8,
+          students_count: course.students_count || 0,
+          lessons_count: course.lessons_count || course.total_lessons || 0,
+          is_free: course.is_free || course.price === 0,
+          is_enrolled: course.is_enrolled || false,
+          slug: course.slug
+        }));
 
-        // Fetch categories
-        const { data: categoriesData, error: categoriesError } = await supabase
-          .from('categories')
-          .select('*')
-          .order('name');
-
-        if (categoriesError) {
-          console.error('Error fetching categories:', categoriesError);
-          toast.error('Failed to load categories');
-          return;
-        }
-
-        setCourses(coursesData || []);
-        setCategories(categoriesData || []);
-
+        setCourses(mappedCourses);
+        console.log('📚 Courses mapped and set:', mappedCourses);
       } catch (error) {
-        console.error('Error fetching data:', error);
-        toast.error('Failed to load data');
+        console.error('❌ Error fetching courses:', error);
+        toast.error('Failed to load courses. Please refresh the page.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, []);
+    fetchCourses();
+  }, [token]);
 
-  const filteredCourses = selectedCategory === 'all' 
-    ? courses 
-    : courses.filter(course => course.category_id === selectedCategory);
+  const handleEnrollmentSuccess = (courseId: number) => {
+    console.log(`Successfully enrolled in course ${courseId}`);
+    toast.success('Enrollment successful! Welcome to your new course.');
+
+    // Optionally refresh courses to update enrollment status
+    // fetchCourses();
+  };
+
+  const filteredCourses = courses.filter(course => {
+    const levelMatch = selectedLevel === 'all' || course.level === selectedLevel;
+    const priceMatch = priceFilter === 'all' ||
+      (priceFilter === 'free' && course.is_free) ||
+      (priceFilter === 'paid' && !course.is_free);
+
+    return levelMatch && priceMatch;
+  });
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-muted-foreground">Loading courses...</p>
-        </div>
-      </div>
+      <div className= "min-h-screen bg-gray-50 flex items-center justify-center" >
+      <div className="text-center" >
+        <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-700 mb-2" > Loading Courses </h2>
+            < p className = "text-gray-500" > Fetching latest courses from database...</p>
+              </div>
+              </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <motion.section
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        className="py-20 bg-gradient-to-r from-primary/10 via-primary/5 to-background"
-      >
-        <div className="container mx-auto px-4">
-          <div className="text-center">
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-4xl lg:text-5xl font-bold text-foreground mb-6"
-            >
-              Course Catalog
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-xl text-muted-foreground max-w-2xl mx-auto"
-            >
-              Explore our comprehensive collection of courses designed to advance your career
-            </motion.p>
+    <div className= "min-h-screen bg-gray-50" >
+    <div className="bg-gradient-to-r from-blue-900 via-purple-900 to-blue-800 text-white py-16" >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" >
+        <div className="text-center" >
+          <h1 className="text-4xl font-bold mb-4" > Course Catalog </h1>
+            < p className = "text-xl text-blue-200" >
+              Discover and purchase courses to advance your skills
+                </p>
+                </div>
+                </div>
+                </div>
+
+                < div className = "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" >
+                  <div className="mb-8 flex flex-wrap gap-4 items-center justify-between" >
+                    <div className="flex flex-wrap gap-4" >
+                      <div className="flex items-center gap-2" >
+                        <Filter className="w-4 h-4" />
+                          <select
+                value={ selectedLevel }
+  onChange = {(e) => setSelectedLevel(e.target.value)
+}
+className = "border rounded-md px-3 py-2"
+  >
+  <option value="all" > All Levels </option>
+    < option value = "beginner" > Beginner </option>
+      < option value = "intermediate" > Intermediate </option>
+        < option value = "advanced" > Advanced </option>
+          </select>
           </div>
+
+          < div className = "flex items-center gap-2" >
+            <select
+                value={ priceFilter }
+onChange = {(e) => setPriceFilter(e.target.value)}
+className = "border rounded-md px-3 py-2"
+  >
+  <option value="all" > All Prices </option>
+    < option value = "free" > Free </option>
+      < option value = "paid" > Paid </option>
+        </select>
         </div>
-      </motion.section>
+        </div>
 
-      <div className="container mx-auto px-4 py-12">
-        {/* Category Filter */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="mb-8"
-        >
-          <div className="flex items-center gap-2 mb-4">
-            <Filter className="h-5 w-5 text-muted-foreground" />
-            <span className="font-medium text-foreground">Filter by Category:</span>
+{
+  isAuthenticated && totalItems > 0 && (
+    <div className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-2 rounded-md" >
+      <ShoppingCart className="w-4 h-4" />
+        <span>{ totalItems } items in cart </span>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant={selectedCategory === 'all' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => {
-                setSelectedCategory('all');
-                setSearchParams({});
-              }}
+          )
+}
+</div>
+
+  < div className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" >
+  {
+    filteredCourses.map((course) => (
+      <motion.div
+              key= { course.id }
+              initial = {{ opacity: 0, y: 20 }}
+animate = {{ opacity: 1, y: 0 }}
+transition = {{ duration: 0.3 }}
             >
-              All Courses
-            </Button>
-            {categories.map((category) => (
-              <Button
-                key={category.id}
-                variant={selectedCategory === category.id ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => {
-                  setSelectedCategory(category.id);
-                  setSearchParams({ category: category.id });
-                }}
-              >
-                {category.name}
-              </Button>
-            ))}
-          </div>
-        </motion.div>
+  <CourseCard
+                course={ course }
+onEnrollmentSuccess = { handleEnrollmentSuccess }
+  />
+  </motion.div>
+          ))}
+</div>
 
-        {/* Course Grid */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-        >
-          {filteredCourses.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredCourses.map((course, index) => (
-                <motion.div
-                  key={course.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.1 * index }}
-                  className="group cursor-pointer"
-                >
-                  <Link to={`/courses/${course.slug}`}>
-                    <Card className="overflow-hidden border-0 bg-background shadow-lg hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1">
-                    <div className="relative">
-                      <img 
-                        src={course.thumbnail_url || "/lovable-uploads/bd0b0eb0-6cfd-4fc4-81b8-d4b8002811c9.png"} 
-                        alt={course.title}
-                        className="w-full h-48 object-cover"
-                      />
-                      <div className="absolute top-4 left-4">
-                        <Badge variant={course.price === 0 ? "secondary" : "default"}>
-                          {course.price === 0 ? "Free" : `$${course.price}`}
-                        </Badge>
-                      </div>
-                      {course.categories && (
-                        <div className="absolute top-4 right-4">
-                          <Badge variant="outline" className="bg-background/80 backdrop-blur-sm">
-                            {course.categories.name}
-                          </Badge>
-                        </div>
-                      )}
-                    </div>
-                    <CardContent className="p-6">
-                      <h3 className="font-bold text-lg mb-3 line-clamp-2 group-hover:text-primary transition-colors">
-                        {course.title}
-                      </h3>
-                      <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-                        {course.description}
-                      </p>
-                      
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                        <div className="flex items-center gap-1">
-                          <BookOpen className="h-4 w-4" />
-                          <span>{course.total_lessons || 0} lessons</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          <span>{Math.floor((course.total_duration || 0) / 60)}h</span>
-                        </div>
-                      </div>
-                      
-                      {course.profiles && (
-                        <div className="flex items-center gap-2 mb-4">
-                          <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                            <span className="text-xs font-medium text-primary">
-                              {course.profiles.full_name?.charAt(0) || 'I'}
-                            </span>
-                          </div>
-                          <span className="text-sm font-medium text-foreground">
-                            {course.profiles.full_name || 'Instructor'}
-                          </span>
-                        </div>
-                      )}
-                      
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span className="font-medium text-foreground">4.8</span>
-                          <span className="text-sm text-muted-foreground">(245)</span>
-                        </div>
-                        <Button size="sm">
-                          {course.price === 0 ? 'Enroll Now' : 'View Details'}
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  </Link>
-                </motion.div>
-              ))}
+{
+  filteredCourses.length === 0 && (
+    <div className="text-center py-12" >
+      <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 mb-2" > No courses found </h3>
+          < p className = "text-gray-500" > Try adjusting your filters to see more courses.</p>
             </div>
-          ) : (
-            <div className="text-center py-12">
-              <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-foreground mb-2">No Courses Found</h3>
-              <p className="text-muted-foreground">
-                {selectedCategory === 'all' 
-                  ? 'No courses are currently available.' 
-                  : 'No courses found in this category.'}
-              </p>
-            </div>
-          )}
-        </motion.div>
-      </div>
-    </div>
+        )
+}
+
+<div className="mt-12 bg-green-50 border border-green-200 rounded-lg p-6" >
+  <h3 className="text-lg font-semibold text-green-800 mb-2" >
+            💳 Secure Payment with Paystack
+</h3>
+< div className = "space-y-2 text-sm text-green-700" >
+  <p>✅ Safe and secure payment processing </p>
+    <p>✅ Multiple payment options: Cards, Bank Transfer, USSD </p>
+      <p>✅ Instant course access after payment </p>
+        <p>✅ Add multiple courses to cart for bulk purchase </p>
+          </div>
+          </div>
+          </div>
+          </div>
   );
 }
