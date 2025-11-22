@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// API Base URL - Update this for production
-export const API_BASE_URL = 'http://127.0.0.1:8000/api';
+// API Base URL - Uses environment variable or defaults to Railway production
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://ggtllmsapi-production.up.railway.app/api';
 
 // Create axios instance with default config
 export const apiClient = axios.create({
